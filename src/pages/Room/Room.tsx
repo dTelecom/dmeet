@@ -1,5 +1,5 @@
-import { useToast } from '@chakra-ui/react';
-import { useEffect, useState } from 'react';
+import {useToast} from '@chakra-ui/react';
+import {useEffect, useState} from 'react';
 import ActiveRoom from '../../components/ActiveRoom';
 import PreJoin from '../../components/PreJoin';
 import {SessionProps, TokenResult} from '../../lib/types';
@@ -13,7 +13,7 @@ const Room = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch('https://meet.dmeet.org/api/room/info/'+roomName,{method: "POST"})
+    fetch(process.env.REACT_APP_API_URL + '/api/room/info/' + roomName, {method: "POST"})
       .then((res) => res.json())
       .then((data: TokenResult) => {
         setNumParticipants(data.numParticipants);
@@ -33,7 +33,7 @@ const Room = () => {
   }, [roomName, toast]);
 
   if (!roomName) {
-    return <Navigate to={'/'} />
+    return <Navigate to={'/'}/>
   }
 
   if (sessionProps) {

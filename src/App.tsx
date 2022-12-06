@@ -10,7 +10,6 @@ import Room from "./pages/Room/Room";
 
 function App() {
   return (
-
     <BrowserRouter>
       <Routes>
         <Route

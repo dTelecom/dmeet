@@ -1,20 +1,20 @@
-import { Box, useToast } from '@chakra-ui/react';
-import { DisplayContext, DisplayOptions, LiveKitRoom } from '@livekit/react-components';
-import { Room, RoomEvent, VideoPresets } from 'livekit-client';
-import { useCallback, useEffect, useState } from 'react';
+import {Box, useToast} from '@chakra-ui/react';
+import {DisplayContext, DisplayOptions, LiveKitRoom} from '@livekit/react-components';
+import {Room, RoomEvent, VideoPresets} from 'livekit-client';
+import {useCallback, useEffect, useState} from 'react';
 import 'react-aspect-ratio/aspect-ratio.css';
 import tinykeys from 'tinykeys';
-import { SessionProps, TokenResult } from '../lib/types';
+import {SessionProps, TokenResult} from '../lib/types';
 import Controls from './Controls';
 import DebugOverlay from './DebugOverlay';
 import {useNavigate} from "react-router-dom";
 
 const ActiveRoom = ({
-  roomName,
-  identity,
-  audioTrack,
-  videoTrack,
-}: SessionProps) => {
+                      roomName,
+                      identity,
+                      audioTrack,
+                      videoTrack,
+                    }: SessionProps) => {
   const [tokenResult, setTokenResult] = useState<TokenResult>();
   const [room, setRoom] = useState<Room>();
   const [displayOptions, setDisplayOptions] = useState<DisplayOptions>({
@@ -65,7 +65,7 @@ const ActiveRoom = ({
       roomName,
       identity,
     };
-    fetch('https://meet.dmeet.org/api/room/token/'+roomName+"/"+identity,{method: "POST"})
+    fetch(process.env.REACT_APP_API_URL + '/api/room/token/' + roomName + "/" + identity, {method: "POST"})
       .then((res) => res.json())
       .then((data: TokenResult) => {
         setTokenResult(data);
@@ -87,14 +87,21 @@ const ActiveRoom = ({
   }, [displayOptions]);
 
   if (!tokenResult) {
-    return <Box bg="cld.bg1" minH="100vh"></Box>;
+    return <Box
+      bg="cld.bg1"
+      minH="100vh"
+    ></Box>;
   }
 
   let rtcConfig: RTCConfiguration | undefined;
 
   return (
     <DisplayContext.Provider value={displayOptions}>
-      <Box bg="cld.bg1" height="100vh" padding="0.5rem">
+      <Box
+        bg="cld.bg1"
+        height="100vh"
+        padding="0.5rem"
+      >
         <LiveKitRoom
           url={tokenResult.url}
           token={tokenResult.token}
@@ -115,7 +122,7 @@ const ActiveRoom = ({
           controlRenderer={Controls}
           onLeave={onLeave}
         />
-        {room && <DebugOverlay room={room} />}
+        {room && <DebugOverlay room={room}/>}
       </Box>
     </DisplayContext.Provider>
   );
