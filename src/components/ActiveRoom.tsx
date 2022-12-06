@@ -1,13 +1,13 @@
 import { Box, useToast } from '@chakra-ui/react';
 import { DisplayContext, DisplayOptions, LiveKitRoom } from '@livekit/react-components';
 import { Room, RoomEvent, VideoPresets } from 'livekit-client';
-import { useRouter } from 'next/router';
 import { useCallback, useEffect, useState } from 'react';
 import 'react-aspect-ratio/aspect-ratio.css';
 import tinykeys from 'tinykeys';
 import { SessionProps, TokenResult } from '../lib/types';
 import Controls from './Controls';
 import DebugOverlay from './DebugOverlay';
+import {useNavigate} from "react-router-dom";
 
 const ActiveRoom = ({
   roomName,
@@ -20,7 +20,7 @@ const ActiveRoom = ({
   const [displayOptions, setDisplayOptions] = useState<DisplayOptions>({
     stageLayout: 'grid',
   });
-  const router = useRouter();
+  const navigate = useNavigate();
   const toast = useToast();
 
   useEffect(() => {
@@ -32,7 +32,7 @@ const ActiveRoom = ({
   }, []);
 
   const onLeave = () => {
-    router.push('/');
+    navigate('/');
   };
 
   const onConnected = useCallback(

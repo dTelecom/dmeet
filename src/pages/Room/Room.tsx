@@ -1,20 +1,16 @@
 import { useToast } from '@chakra-ui/react';
-import { GetServerSidePropsContext } from 'next';
-import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import ActiveRoom from '../../components/ActiveRoom';
 import PreJoin from '../../components/PreJoin';
-import { SessionProps } from '../../lib/types';
+import {SessionProps, TokenResult} from '../../lib/types';
+import {Navigate, useNavigate, useParams} from "react-router-dom";
 
-interface RoomProps {
-  roomName: string;
-}
-
-const RoomPage = ({ roomName }: RoomProps) => {
+const Room = () => {
+  const {roomName} = useParams();
   const [sessionProps, setSessionProps] = useState<SessionProps>();
   const [numParticipants, setNumParticipants] = useState<number>(0);
   const toast = useToast();
-  const router = useRouter();
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetch('https://meet.dmeet.org/api/room/info/'+roomName,{method: "POST"})
@@ -25,16 +21,20 @@ const RoomPage = ({ roomName }: RoomProps) => {
   }, []);
 
   useEffect(() => {
-    if (!roomName.match(/\w{4}\-\w{4}/)) {
+    if (!roomName?.match(/\w{4}\-\w{4}/)) {
       toast({
         title: 'Invalid room',
         duration: 2000,
         onCloseComplete: () => {
-          router.push('/');
+          navigate('/');
         },
       });
     }
-  }, [roomName, toast, router]);
+  }, [roomName, toast]);
+
+  if (!roomName) {
+    return <Navigate to={'/'} />
+  }
 
   if (sessionProps) {
     return (
@@ -53,26 +53,4 @@ const RoomPage = ({ roomName }: RoomProps) => {
   }
 };
 
-export const getServerSideProps = async (context: GetServerSidePropsContext) => {
-
-  const roomName = context.params?.name;
-
-  if (typeof roomName !== 'string') {
-    return {
-      redirect: {
-        destination: '/',
-        permanent: false,
-      },
-    };
-  }
-
-  const props: RoomProps = {
-    roomName,
-  };
-
-  return {
-    props,
-  };
-};
-
-export default RoomPage;
+export default Room;
