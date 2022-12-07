@@ -1,5 +1,5 @@
 import {Box, useToast} from '@chakra-ui/react';
-import {DisplayContext, DisplayOptions, LiveKitRoom} from '@livekit/react-components';
+import {DisplayContext, DisplayOptions} from '@livekit/react-components';
 import {Room, RoomEvent, VideoPresets} from 'livekit-client';
 import {useCallback, useEffect, useState} from 'react';
 import 'react-aspect-ratio/aspect-ratio.css';
@@ -8,6 +8,7 @@ import {SessionProps, TokenResult} from '../lib/types';
 import Controls from './Controls';
 import DebugOverlay from './DebugOverlay';
 import {useNavigate} from "react-router-dom";
+import {LiveKitRoom} from './LiveKitRoom';
 
 const ActiveRoom = ({
                       roomName,
@@ -32,11 +33,13 @@ const ActiveRoom = ({
   }, []);
 
   const onLeave = () => {
+    console.log("onLeave")
     navigate('/');
   };
 
   const onConnected = useCallback(
     (room: Room) => {
+      console.log("onConnected")
       setRoom(room);
       /* @ts-ignore */
       window.currentRoom = room;
@@ -94,6 +97,9 @@ const ActiveRoom = ({
   }
 
   let rtcConfig: RTCConfiguration | undefined;
+  // rtcConfig = {
+  //   iceTransportPolicy: 'relay',
+  // };
 
   return (
     <DisplayContext.Provider value={displayOptions}>
