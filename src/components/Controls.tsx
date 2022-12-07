@@ -9,7 +9,7 @@ import {
   VideoSelectButton,
 } from '@livekit/react-components';
 import { useState } from 'react';
-import styles from '../styles/Room.module.css';
+import styles from '../pages/Room/Room.module.css';
 import ChatOverlay from './ChatOverlay';
 
 const Controls = ({ room, onLeave }: ControlsProps) => {

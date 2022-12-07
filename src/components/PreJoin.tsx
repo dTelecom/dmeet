@@ -1,5 +1,4 @@
 import { AspectRatio, Box, Button, Center, Grid, GridItem, Link, Text } from '@chakra-ui/react';
-import { typography } from '@livekit/livekit-chakra-theme';
 import { AudioSelectButton, VideoRenderer, VideoSelectButton } from '@livekit/react-components';
 import {
   createLocalAudioTrack,
@@ -10,7 +9,7 @@ import {
 } from 'livekit-client';
 import { ReactElement, useEffect, useState } from 'react';
 import { SessionProps } from '../lib/types';
-import styles from '../styles/Room.module.css';
+import styles from '../pages/Room/Room.module.css';
 import TextField from './TextField';
 
 interface PreJoinProps {
@@ -176,7 +175,6 @@ const PreJoin = ({
               variant="primary"
               py="0.75rem"
               px="2rem"
-              {...typography.textStyles['h5-mono']}
               _hover={{ backgroundColor: '#4963B0' }}
             >
               {numParticipants > 0 ? 'Join' : 'Start'} Meeting

@@ -71,6 +71,7 @@ export const DebugOverlay = ({ room }: DebugProps) => {
     let isReconnect = false;
     switch (value) {
       case 'signal-reconnect':
+      // @ts-ignore
       case 'migration':
         isReconnect = true;
 

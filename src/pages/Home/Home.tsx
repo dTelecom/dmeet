@@ -1,13 +1,12 @@
 import { Box, Button, Text } from '@chakra-ui/react';
-import { typography } from '@livekit/livekit-chakra-theme';
-import type { NextPage } from 'next';
-import { useRouter } from 'next/router';
-import styles from '../styles/Home.module.css';
+import styles from './Home.module.css';
+import {useNavigate} from "react-router-dom";
 
-const Home: NextPage = () => {
-  const router = useRouter();
+const Home = () => {
+  const navigate = useNavigate();
+
   const startMeeting = () => {
-    router.push(`/rooms/${generateRoomId()}`);
+    navigate(`/rooms/${generateRoomId()}`);
   };
 
   return (
@@ -21,7 +20,6 @@ const Home: NextPage = () => {
           variant="primary"
           py="0.75rem"
           px="2rem"
-          {...typography.textStyles['h5-mono']}
           _hover={{ backgroundColor: '#4963B0' }}
         >
           Start Meeting
