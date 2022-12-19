@@ -1,28 +1,18 @@
+import 'regenerator-runtime/runtime';
 import React from 'react';
-import './styles/global.css';
-import {
-  BrowserRouter,
-  Route,
-  Routes
-} from "react-router-dom";
-import Home from "./pages/Home/Home";
-import Room from "./pages/Room/Room";
+import {Route, Routes} from 'react-router-dom';
+import Home from './pages/Home/Home';
+import Call from './pages/Call/Call';
 
-function App() {
+const App = () => {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route
-          path="/"
-          element={<Home/>}
-        />
-        <Route
-          path="/rooms/:roomName"
-          element={<Room/>}
-        />
-      </Routes>
-    </BrowserRouter>
+    <Routes>
+      <Route index element={<Home/>}/>
+      <Route path={'/call'} element={<Call/>}/>
+      <Route path={'/join/:sid'} element={<Home isJoin/>}/>
+      <Route path={'/call/:sid'} element={<Call/>}/>
+    </Routes>
   );
-}
+};
 
 export default App;
