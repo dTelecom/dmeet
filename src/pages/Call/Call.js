@@ -37,10 +37,8 @@ const Call = () => {
   const location = useLocation()
   const clientLocal = useRef()
   const signalLocal = useRef()
-  const dcLocal = useRef()
   const [participants, setParticipants] = useState([])
   const [loading, setLoading] = useState(true)
-  const [, setDcOpen] = useState(false)
   const [inviteLink, setInviteLink] = useState('')
   const [copied, setCopied] = useState(false)
   const [lastRemote, setLastRemote] = useState(0)
@@ -95,22 +93,6 @@ const Call = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-
-  const processDCIncomingRemote = (label, data) => {
-    console.log('[processDCIncomingRemote] label, data=', label, data)
-    const d = JSON.parse(data)
-    switch (d.type) {
-      case 'connected': {
-        return
-      }
-      case 'mute': {
-        setMediaState(prev => ({...prev, [label]: {audio: !d.audioMute, video: !d.videoMute}}))
-        return
-      }
-      default:
-        return
-    }
-  }
 
   const sendState = () => {
     if (signalLocal.current?.socket.readyState === 1) {
@@ -234,16 +216,7 @@ const Call = () => {
 
       _signalLocal.onopen = async () => {
         clientLocal.current.join(_sid, uid, name);
-        dcLocal.current = clientLocal.current.createDataChannel(localUid.current)
-        dcLocal.current.onopen = () => setDcOpen(true)
 
-        clientLocal.current.ondatachannel = ({channel}) => {
-          console.log('[ondatachannel remote] channel=', channel)
-          channel.onopen = () => channel.send(JSON.stringify({type: 'connected', uid: localUid.current}))
-          channel.onmessage = ({data}) => {
-            processDCIncomingRemote(channel.label, data)
-          };
-        };
         publish()
       }
       _signalLocal.on_notify('onJoin', onJoin);
