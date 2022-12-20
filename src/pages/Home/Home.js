@@ -59,7 +59,7 @@ const Home = ({isJoin = false}) => {
           media: stream,
           muted: true,
           hideBadge: true,
-          style: {width: '100%', height: '100%'},
+          style: {width: '100%', height: '100%', transform: 'scale(-1, 1)'},
           audio: !!config.audio,
           video: !!config.video,
         })

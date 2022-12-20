@@ -27,20 +27,20 @@ const config = {
   ],
 };
 
-const serversUrls = ['wss://de.dmeet.org/ws', 'wss://uk.dmeet.org/ws', 'wss://ca.dmeet.org/ws', 'wss://sg.dmeet.org/ws'];
+// const serversUrls = ['wss://de.dmeet.org/ws', 'wss://uk.dmeet.org/ws', 'wss://ca.dmeet.org/ws', 'wss://sg.dmeet.org/ws'];
+const serversUrls = ['wss://de.dmeet.org/ws'];
 
 const Call = () => {
   const {isMobile} = useBreakpoints();
   const navigate = useNavigate()
   const [devices, setDevices] = useState([])
-  const {sid} = useParams()
+  const {sid: urlSid} = useParams()
   const location = useLocation()
   const clientLocal = useRef()
   const signalLocal = useRef()
-  const dcLocal = useRef()
+  const [sid] = useState(urlSid || makeId(6))
   const [participants, setParticipants] = useState([])
   const [loading, setLoading] = useState(true)
-  const [, setDcOpen] = useState(false)
   const [inviteLink, setInviteLink] = useState('')
   const [copied, setCopied] = useState(false)
   const [lastRemote, setLastRemote] = useState(0)
@@ -96,23 +96,7 @@ const Call = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const processDCIncomingRemote = (label, data) => {
-    console.log('[processDCIncomingRemote] label, data=', label, data)
-    const d = JSON.parse(data)
-    switch (d.type) {
-      case 'connected': {
-        return
-      }
-      case 'mute': {
-        setMediaState(prev => ({...prev, [label]: {audio: !d.audioMute, video: !d.videoMute}}))
-        return
-      }
-      default:
-        return
-    }
-  }
-
-  const sendState = () => {
+  const sendState = useCallback(() => {
     if (signalLocal.current?.socket.readyState === 1) {
       console.log('[sendState]', 'audio enabled: ' + audioEnabled, 'video enabled: ' + videoEnabled)
 
@@ -124,7 +108,7 @@ const Call = () => {
         muted: !videoEnabled, kind: 'video'
       })
     }
-  }
+  }, [audioEnabled, videoEnabled])
 
   useEffect(() => {
     sendState()
@@ -183,20 +167,27 @@ const Call = () => {
           video: videoEnabled
         }
       }))
-      // setParticipants([{uid: localUid.current, streamID: media.id, name}]);
+
+      onJoin({
+        participant: {
+          uid: localUid.current,
+          streamID: media.id,
+          name,
+          sid
+        }
+      })
       setLoading(false)
     })
       .catch(console.error);
-  }, [audioEnabled, constraints.audio?.exact, constraints.video, defaultConstraints.video, videoEnabled])
+  }, [audioEnabled, constraints.audio?.exact, constraints.video, defaultConstraints.video, name, sid, videoEnabled])
 
   const start = useCallback(async () => {
     try {
       const randomServer = serversUrls[Math.floor(Math.random() * serversUrls.length)];
-      const _sid = sid || makeId(6);
       const uid = makeId(6);
-      const parsedSID = _sid;
-      localUid.current = uid;
-      console.log(`Created: `, _sid, uid, name);
+      const parsedSID = sid;
+      localUid.current = sid;
+      console.log(`Created: `, sid, uid, name);
       console.log(`Join: `, parsedSID, localUid.current);
 
       setInviteLink(window.location.origin + '/join/' + parsedSID)
@@ -233,18 +224,9 @@ const Call = () => {
       };
 
       _signalLocal.onopen = async () => {
-        clientLocal.current.join(_sid, uid, name);
-        dcLocal.current = clientLocal.current.createDataChannel(localUid.current)
-        dcLocal.current.onopen = () => setDcOpen(true)
-
-        clientLocal.current.ondatachannel = ({channel}) => {
-          console.log('[ondatachannel remote] channel=', channel)
-          channel.onopen = () => channel.send(JSON.stringify({type: 'connected', uid: localUid.current}))
-          channel.onmessage = ({data}) => {
-            processDCIncomingRemote(channel.label, data)
-          };
-        };
-        publish()
+        clientLocal.current.join(sid, uid, name);
+        sendState()
+        void publish()
       }
       _signalLocal.on_notify('onJoin', onJoin);
       _signalLocal.on_notify('onLeave', onLeave);
@@ -254,7 +236,7 @@ const Call = () => {
     } catch (errors) {
       console.error(errors);
     }
-  }, [hangup, name, onLeave, publish, sid])
+  }, [hangup, name, onLeave, publish, sendState, sid])
 
   const loadMedia = useCallback(async () => {
     // HACK: dev use effect fires twice
@@ -288,7 +270,7 @@ const Call = () => {
     }
   }
 
-  const onParticipantsEvent = ({participants}) => {
+  const onParticipantsEvent = (participants) => {
     console.log('[onParticipantsEvent]', participants)
     if (!participants) return
     setParticipants(Object.values(participants))
@@ -352,7 +334,7 @@ const Call = () => {
       [localUid.current]: {...prev[localUid.current], [type]: !prev[localUid.current][type]}
     }))
   }, [constraints, onMediaToggle])
-  console.log(streams.current, participants)
+
   return (
     <Box
       className={styles.container}
@@ -405,7 +387,7 @@ const Call = () => {
                   key={participant.streamID + index}
                   participant={participant}
                   stream={streams.current[participant.streamID]}
-                  muted={participant.streamID === localMedia.current.id}
+                  isCurrentUser={participant.streamID === localMedia.current.id}
                   name={participant.name}
                   mediaState={mediaState[participant.uid]}
                 />
@@ -422,11 +404,10 @@ const Call = () => {
                   key={participant.streamID + index}
                   participant={participant}
                   stream={streams.current[participant.streamID]}
-                  muted={participant.streamID === localMedia.current.id}
+                  isCurrentUser={participant.streamID === localMedia.current.id}
                   name={participant.name}
                   mediaState={mediaState[participant.uid]}
                 />
-
               )
             )}
           </PackedGrid>
