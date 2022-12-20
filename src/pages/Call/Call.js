@@ -217,11 +217,14 @@ const Call = () => {
         console.log('[onactivelayer] layer=', layer)
       };
       _clientLocal.ontrack = (track, stream) => {
-        console.log('got track', track, 'for stream', stream);
+        console.log('[got track]', track, 'for stream', stream);
 
         // If the stream is not there in the streams map.
         if (!streams.current[stream.id]) {
           streams.current[stream.id] = stream
+          setMediaState(prev => ({
+            ...prev
+          }))
         }
 
         stream.onremovetrack = () => {
@@ -279,7 +282,7 @@ const Call = () => {
         if (!newParticipants.some(p => p.uid === participant.uid)) {
           return [...prev, participant]
         }
-        return participant
+        return newParticipants
       })
       setLastRemote(Date.now())
     }
@@ -349,7 +352,7 @@ const Call = () => {
       [localUid.current]: {...prev[localUid.current], [type]: !prev[localUid.current][type]}
     }))
   }, [constraints, onMediaToggle])
-
+  console.log(streams.current, participants)
   return (
     <Box
       className={styles.container}
