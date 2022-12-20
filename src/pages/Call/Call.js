@@ -27,8 +27,7 @@ const config = {
   ],
 };
 
-// const serversUrls = ['wss://de.dmeet.org/ws', 'wss://uk.dmeet.org/ws', 'wss://ca.dmeet.org/ws', 'wss://sg.dmeet.org/ws'];
-const serversUrls = ['wss://de.dmeet.org/ws'];
+const serversUrls = ['wss://de.dmeet.org/ws', 'wss://uk.dmeet.org/ws', 'wss://ca.dmeet.org/ws', 'wss://sg.dmeet.org/ws'];
 
 const Call = () => {
   const {isMobile} = useBreakpoints();
