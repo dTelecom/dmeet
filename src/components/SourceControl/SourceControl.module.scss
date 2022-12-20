@@ -62,3 +62,7 @@
 		}
 	}
 }
+
+:global(.chakra-popover__popper) {
+	z-index: 1;
+}
