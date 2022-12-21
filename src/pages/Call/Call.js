@@ -29,6 +29,9 @@ const config = {
 
 const serversUrls = ['wss://de.dmeet.org/ws', 'wss://uk.dmeet.org/ws', 'wss://ca.dmeet.org/ws', 'wss://sg.dmeet.org/ws'];
 
+// const serversUrls = ['ws://127.0.0.1:57000/ws', 'ws://127.0.0.1:57001/ws', 'ws://127.0.0.1:57002/ws'];
+// const serversUrls = ['ws://127.0.0.1:57000/ws'];
+
 const Call = () => {
   const {isMobile} = useBreakpoints();
   const navigate = useNavigate()
@@ -185,7 +188,7 @@ const Call = () => {
       const randomServer = serversUrls[Math.floor(Math.random() * serversUrls.length)];
       const uid = makeId(6);
       const parsedSID = sid;
-      localUid.current = sid;
+      localUid.current = uid;
       console.log(`Created: `, sid, uid, name);
       console.log(`Join: `, parsedSID, localUid.current);
 
@@ -200,12 +203,7 @@ const Call = () => {
       _clientLocal.onerrnegotiate = () => {
         hangup()
       };
-      _clientLocal.onspeaker = (speakers) => {
-        console.log('[onspeaker] speakers=', speakers)
-      };
-      _clientLocal.onactivelayer = (layer) => {
-        console.log('[onactivelayer] layer=', layer)
-      };
+
       _clientLocal.ontrack = (track, stream) => {
         console.log('[got track]', track, 'for stream', stream);
 
@@ -273,6 +271,7 @@ const Call = () => {
     console.log('[onParticipantsEvent]', participants)
     if (!participants) return
     setParticipants(Object.values(participants))
+      setLastRemote(Date.now())
   }
 
   const onStream = ({participant}) => {
@@ -386,7 +385,7 @@ const Call = () => {
                   key={participant.streamID + index}
                   participant={participant}
                   stream={streams.current[participant.streamID]}
-                  isCurrentUser={participant.streamID === localMedia.current.id}
+                  isCurrentUser={participant.uid === localUid.current}
                   name={participant.name}
                   mediaState={mediaState[participant.uid]}
                 />
@@ -403,7 +402,7 @@ const Call = () => {
                   key={participant.streamID + index}
                   participant={participant}
                   stream={streams.current[participant.streamID]}
-                  isCurrentUser={participant.streamID === localMedia.current.id}
+                  isCurrentUser={participant.uid === localUid.current}
                   name={participant.name}
                   mediaState={mediaState[participant.uid]}
                 />
