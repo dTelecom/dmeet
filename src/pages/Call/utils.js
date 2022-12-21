@@ -48,6 +48,7 @@ export const createVideoElement = ({media: stream, muted, name, hideBadge, style
   if (style) {
     container.style.width = style.width
     container.style.height = style.height
+    container.style.transform = style.transform
   }
 
   const placeholder = document.createElement('img')

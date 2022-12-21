@@ -4,7 +4,7 @@ import {MutedAudio, MutedVideo, SignalIcon, VideoPlaceholder} from '../../assets
 import {Box} from '@chakra-ui/react';
 import {useBreakpoints} from '../../hooks/useBreakpoints';
 
-const Video = ({participant, stream, muted, name, mediaState}) => {
+const Video = ({participant, stream, isCurrentUser, name, mediaState}) => {
   const container = useRef()
   const videoElement = useRef();
   const {isMobile} = useBreakpoints();
@@ -32,10 +32,11 @@ const Video = ({participant, stream, muted, name, mediaState}) => {
           ref={videoElement}
           id={'stream_' + participant.streamID}
           autoPlay
-          muted={muted}
+          muted={isCurrentUser}
           playsInline
           style={{
             opacity: mediaState?.video ? '1' : '0',
+            transform: isCurrentUser ? 'scale(-1, 1)' : 'none',
           }}
         />
 
