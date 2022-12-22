@@ -18,8 +18,12 @@ import {makeId} from './utils';
 import {IonSFUJSONRPCSignal} from 'js-sdk/lib/signal/json-rpc-impl';
 import {LocalStream} from 'js-sdk/lib/stream';
 import Client from 'js-sdk/lib/client';
+import * as e2ee from './e2ee'
+
+const useE2ee = true;
 
 const config = {
+  encodedInsertableStreams: true,
   iceServers: [
     {
       urls: 'stun:stun.l.google.com:19302',
@@ -40,7 +44,7 @@ const Call = () => {
   const location = useLocation()
   const clientLocal = useRef()
   const signalLocal = useRef()
-  const [sid] = useState(urlSid || makeId(6))
+  const [sid] = useState(urlSid || makeId(16))
   const [participants, setParticipants] = useState([])
   const [loading, setLoading] = useState(true)
   const [inviteLink, setInviteLink] = useState('')
@@ -162,6 +166,14 @@ const Call = () => {
 
       await clientLocal.current.publish(media)
 
+      if (useE2ee) {
+        e2ee.setKey(new TextEncoder().encode(sid))
+        clientLocal.current.transports[0].pc.getSenders().forEach(e2ee.setupSenderTransform);
+        clientLocal.current.transports[1].pc.addEventListener('track', (e)=>{
+          e2ee.setupReceiverTransform(e.receiver);
+        });
+      }
+
       streams.current[media.id] = media
       setMediaState(prev => ({
         ...prev, [localUid.current]: {
@@ -186,7 +198,7 @@ const Call = () => {
   const start = useCallback(async () => {
     try {
       const randomServer = serversUrls[Math.floor(Math.random() * serversUrls.length)];
-      const uid = makeId(6);
+      const uid = makeId(16);
       const parsedSID = sid;
       localUid.current = uid;
       console.log(`Created: `, sid, uid, name);
