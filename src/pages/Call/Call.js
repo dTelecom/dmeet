@@ -201,6 +201,7 @@ const Call = () => {
         url = 'https://meet.dmeet.org/api/room/join';
       } else {
         data.title = `${name} room`
+        data.callID = makeId(16)
       }
       const response = await axios.post(url, data);
       const randomServer = response.data.url;
