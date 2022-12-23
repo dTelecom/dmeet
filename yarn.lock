@@ -6969,7 +6969,7 @@ jest@^27.4.3:
 
 "js-sdk@https://github.com/dTelecom/js-sdk":
   version "1.8.1"
-  resolved "https://github.com/dTelecom/js-sdk#06e8c807809df1e81f69966c9e803665fe7f2a36"
+  resolved "https://github.com/dTelecom/js-sdk#2b9e0729eaff54ae87fdd6c177188b0b2a2137f5"
   dependencies:
     browser-headers "^0.4.1"
     events "^3.0.0"

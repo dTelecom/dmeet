@@ -11,6 +11,7 @@ import VideoControls from '../../components/VideoControls/VideoControls';
 import Footer from '../../components/Footer/Footer';
 import {createVideoElement, hideMutedBadge, showMutedBadge} from '../Call/utils';
 import {useMediaConstraints} from '../../hooks/useMediaConstraints';
+import axios from 'axios';
 
 const Home = ({isJoin = false}) => {
   const navigate = useNavigate()
@@ -124,6 +125,18 @@ const Home = ({isJoin = false}) => {
       onMediaToggle('video')
     }
   }
+
+  const loadRoom = async () => {
+    axios.post('https://meet.dmeet.org/api/room/info', {sid: sid}).then((response) => {
+      console.log(response.data);
+    }).catch(console.error);
+  }
+
+  useEffect(() => {
+    if (isJoin) {
+      void loadRoom()
+    }
+  }, [])
 
   const disabled = !name || !hasVideo;
 

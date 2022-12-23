@@ -19,6 +19,7 @@ import {IonSFUJSONRPCSignal} from 'js-sdk/lib/signal/json-rpc-impl';
 import {LocalStream} from 'js-sdk/lib/stream';
 import Client from 'js-sdk/lib/client';
 import * as e2ee from './e2ee'
+import axios from 'axios';
 
 const useE2ee = true;
 
@@ -31,11 +32,6 @@ const config = {
   ],
 };
 
-const serversUrls = ['wss://de.dmeet.org/ws', 'wss://uk.dmeet.org/ws', 'wss://ca.dmeet.org/ws', 'wss://sg.dmeet.org/ws'];
-
-// const serversUrls = ['ws://127.0.0.1:57000/ws', 'ws://127.0.0.1:57001/ws', 'ws://127.0.0.1:57002/ws'];
-// const serversUrls = ['ws://127.0.0.1:57000/ws'];
-
 const Call = () => {
   const {isMobile} = useBreakpoints();
   const navigate = useNavigate()
@@ -44,7 +40,7 @@ const Call = () => {
   const location = useLocation()
   const clientLocal = useRef()
   const signalLocal = useRef()
-  const [sid] = useState(urlSid || makeId(16))
+  const [sid] = useState(urlSid || undefined)
   const [participants, setParticipants] = useState([])
   const [loading, setLoading] = useState(true)
   const [inviteLink, setInviteLink] = useState('')
@@ -65,6 +61,7 @@ const Call = () => {
   const streams = useRef({})
   const [mediaState, setMediaState] = useState({})
   const localUid = useRef()
+  const localKey = useRef()
 
   useEffect(() => {
     return () => {
@@ -167,7 +164,7 @@ const Call = () => {
       await clientLocal.current.publish(media)
 
       if (useE2ee) {
-        e2ee.setKey(new TextEncoder().encode(sid))
+        e2ee.setKey(new TextEncoder().encode(localKey.current))
         clientLocal.current.transports[0].pc.getSenders().forEach(e2ee.setupSenderTransform);
         clientLocal.current.transports[1].pc.addEventListener('track', (e)=>{
           e2ee.setupReceiverTransform(e.receiver);
@@ -197,11 +194,21 @@ const Call = () => {
 
   const start = useCallback(async () => {
     try {
-      const randomServer = serversUrls[Math.floor(Math.random() * serversUrls.length)];
-      const uid = makeId(16);
-      const parsedSID = sid;
-      localUid.current = uid;
-      console.log(`Created: `, sid, uid, name);
+      let url = 'https://meet.dmeet.org/api/room/create';
+      let data = {name: name};
+      if (sid !== undefined) {
+        data.sid = sid
+        url = 'https://meet.dmeet.org/api/room/join';
+      } else {
+        data.title = `${name} room`
+      }
+      const response = await axios.post(url, data);
+      const randomServer = response.data.url;
+      const parsedSID = response.data.sid;
+      localUid.current = response.data.uid;
+      localKey.current = response.data.key;
+
+      console.log(`Created: `, response.data);
       console.log(`Join: `, parsedSID, localUid.current);
 
       setInviteLink(window.location.origin + '/join/' + parsedSID)
@@ -233,7 +240,7 @@ const Call = () => {
       };
 
       _signalLocal.onopen = async () => {
-        clientLocal.current.join(sid, uid, name);
+        clientLocal.current.join(response.data.token, response.data.signature);
         sendState()
         void publish()
       }
