@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useCallback} from 'react'
 import {
   ArrowDisabledDown,
   ArrowDownIcon,
@@ -8,7 +8,7 @@ import {
   VideoOffIcon,
   VideoOnIcon
 } from '../../assets'
-import {Popover, PopoverBody, PopoverContent, PopoverTrigger, useDisclosure} from '@chakra-ui/react'
+import {IconButton, Popover, PopoverBody, PopoverContent, PopoverTrigger, useDisclosure} from '@chakra-ui/react'
 import styles from './SourceControl.module.scss'
 import classNames from 'classnames'
 
@@ -20,6 +20,13 @@ const SourceControl = ({isVideo, selected, devices, enabled, onChange, toggleMut
   const icon = isVideo ? VideoOnIcon : MicOnIcon
   const {isOpen, onClose, onOpen} = useDisclosure()
 
+  const onMuteClick = useCallback((e) => {
+    e.stopPropagation()
+    toggleMute()
+  }, [toggleMute])
+
+  const text = enabled ? disableText : enableText
+
   return (
     <Popover
       closeOnBlur={false}
@@ -30,14 +37,30 @@ const SourceControl = ({isVideo, selected, devices, enabled, onChange, toggleMut
     >
       <PopoverTrigger>
         <div className={classNames(styles.container, !enabled && styles.containerDisabled, isCall && styles.isCall)}>
-          <img
-            className={styles.icon}
-            src={enabled ? enabledIcon : disabledIcon}
-          />
-          <img
-            className={classNames(isOpen && styles.arrowOpen)}
-            src={enabled ? ArrowDownIcon : ArrowDisabledDown}
-          />
+          <IconButton
+            className={styles.iconButton}
+            onClick={onMuteClick}
+            aria-label={`${text} button`}
+          >
+            <img
+              src={enabled ? enabledIcon : disabledIcon}
+              alt={`${text} icon`}
+            />
+          </IconButton>
+
+          <div className={styles.divider}/>
+
+          <IconButton
+            className={styles.iconButton}
+            onClick={onOpen}
+            aria-label={'select source'}
+          >
+            <img
+              className={classNames(isOpen && styles.arrowOpen)}
+              src={enabled ? ArrowDownIcon : ArrowDisabledDown}
+              alt={'select source icon'}
+            />
+          </IconButton>
         </div>
       </PopoverTrigger>
 
@@ -53,7 +76,10 @@ const SourceControl = ({isVideo, selected, devices, enabled, onChange, toggleMut
                 key={device.deviceId}
                 className={styles.popOverItem}
               >
-                <img src={selected === device.deviceId ? EnabledTickIcon : icon}/>
+                <img
+                  alt={'source icon'}
+                  src={selected === device.deviceId ? EnabledTickIcon : icon}
+                />
                 <p>{device.label}</p>
               </button>
             )) : null}
@@ -64,7 +90,7 @@ const SourceControl = ({isVideo, selected, devices, enabled, onChange, toggleMut
                   toggleMute()
                   onClose()
                 }}
-              >{enabled ? disableText : enableText}</button>
+              >{text}</button>
             </div>
           </div>
         </PopoverBody>
