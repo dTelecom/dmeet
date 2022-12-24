@@ -7,9 +7,10 @@ interface IProps {
   label: string
   checked: boolean
   setChecked: (checked: boolean) => void
+  disabled?: boolean
 }
 
-export const CustomCheckbox = ({label, checked, setChecked}: IProps) => {
+export const CustomCheckbox = ({label, checked, setChecked,disabled}: IProps) => {
   const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setChecked(event.target.checked)
   }
@@ -36,6 +37,7 @@ export const CustomCheckbox = ({label, checked, setChecked}: IProps) => {
       icon={<CustomIcon/>}
       spacing={0}
       className={styles.checkbox}
+      disabled={disabled}
     >
       {label}
     </Checkbox>

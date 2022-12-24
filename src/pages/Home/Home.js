@@ -236,6 +236,7 @@ const Home = ({isJoin = false}) => {
                     label={"End-to-end encryption (E2EE)"}
                     checked={e2ee}
                     setChecked={setE2ee}
+                    disabled={isJoin}
                   />
 
                   <p className={styles.text}>
