@@ -2,15 +2,14 @@ import React from 'react'
 import {CheckboxOffIcon, CheckboxOnIcon} from "../../assets"
 import {Box, Checkbox} from "@chakra-ui/react"
 import styles from './CustomCheckbox.module.scss'
+import {CheckboxProps} from "@chakra-ui/checkbox";
 
-interface IProps {
+interface IProps extends CheckboxProps {
   label: string
-  checked: boolean
   setChecked: (checked: boolean) => void
-  disabled?: boolean
 }
 
-export const CustomCheckbox = ({label, checked, setChecked,disabled}: IProps) => {
+export const CustomCheckbox = ({label, checked, setChecked, ...checkboxProps}: IProps) => {
   const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setChecked(event.target.checked)
   }
@@ -36,8 +35,9 @@ export const CustomCheckbox = ({label, checked, setChecked,disabled}: IProps) =>
       onChange={handleCheckboxChange}
       icon={<CustomIcon/>}
       spacing={0}
+      checked={checked}
       className={styles.checkbox}
-      disabled={disabled}
+      {...checkboxProps}
     >
       {label}
     </Checkbox>
