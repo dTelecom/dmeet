@@ -57,7 +57,7 @@ const Call = () => {
   const localKey = useRef()
 
   const name = useMemo(() => location.state?.name || (Math.random() + 1).toString(36).substring(7), [location.state?.name])
-  const useE2ee = useMemo(() => location.state?.e2ee || true, [location.state?.e2ee])
+  const useE2ee = useMemo(() => Boolean(location.state?.e2ee), [location.state?.e2ee])
 
   const started = useRef(false)
 
@@ -170,11 +170,12 @@ const Call = () => {
   const start = useCallback(async () => {
     try {
       let url = 'https://meet.dmeet.org/api/room/create';
-      let data = {name: name};
+      let data = {name};
       if (sid !== undefined) {
         data.sid = sid
         url = 'https://meet.dmeet.org/api/room/join';
       } else {
+        data.e2ee = useE2ee
         data.title = `${name} room`
         data.callID = makeId(16)
       }
@@ -228,7 +229,7 @@ const Call = () => {
     } catch (errors) {
       console.error(errors);
     }
-  }, [hangup, name, onLeave, publish, sendState, sid])
+  }, [hangup, name, onLeave, publish, sendState, sid, useE2ee])
 
   const loadMedia = useCallback(async () => {
     // HACK: dev use effect fires twice
