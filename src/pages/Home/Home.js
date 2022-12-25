@@ -12,12 +12,19 @@ import Footer from '../../components/Footer/Footer';
 import {createVideoElement, hideMutedBadge, showMutedBadge} from '../Call/utils';
 import {useMediaConstraints} from '../../hooks/useMediaConstraints';
 import axios from 'axios';
+import ParticipantsBadge from '../../components/ParticipantsBadge/ParticipantsBadge';
+import {useBreakpoints} from '../../hooks/useBreakpoints';
+import classNames from 'classnames';
+import {CustomCheckbox} from '../../components/Checkbox/CustomCheckbox';
 
 const Home = ({isJoin = false}) => {
   const navigate = useNavigate()
+  const {isMobile} = useBreakpoints()
   const [name, setName] = useState('')
   const [hasVideo, setHasVideo] = useState(false)
   const [devices, setDevices] = useState([])
+  const [room, setRoom] = useState()
+  const [e2ee, setE2ee] = useState(false)
   const {
     constraints,
     onDeviceChange,
@@ -128,7 +135,10 @@ const Home = ({isJoin = false}) => {
 
   const loadRoom = async () => {
     axios.post('https://meet.dmeet.org/api/room/info', {sid: sid}).then((response) => {
-      console.log(response.data);
+      setRoom(response.data)
+      if (response.data.e2ee) {
+        setE2ee(response.data.e2ee)
+      }
     }).catch(console.error);
   }
 
@@ -136,12 +146,13 @@ const Home = ({isJoin = false}) => {
     if (isJoin) {
       void loadRoom()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const disabled = !name || !hasVideo;
 
-  const title = isJoin ? 'Join\nmeeting' : 'Try one click\nmeeting'
-  const buttonText = isJoin ? 'Join meeting' : 'Create a meeting'
+  const title = isJoin ? `Join ${room?.hostName}\nmeeting` : 'Try one click\nmeeting'
+  const buttonText = isJoin ? `Join meeting` : 'Create a meeting'
 
   return (
     <>
@@ -194,7 +205,8 @@ const Home = ({isJoin = false}) => {
                       name,
                       callState: constraintsState,
                       audioEnabled,
-                      videoEnabled
+                      videoEnabled,
+                      e2ee,
                     }
                   })}
                   text={buttonText}
@@ -202,11 +214,36 @@ const Home = ({isJoin = false}) => {
                 />
               </Box>
 
-              {!isJoin && (
-                <p className={styles.text}>
-                  {'Meeting time limit is 30 minutes. \n' +
-                    'The number of participants is up to 10 people.'}
-                </p>
+              {isJoin ? (
+                <Flex
+                  mt={isMobile ? 24 : 22}
+                  height={32}
+                  gap={8}
+                  alignItems="center"
+                >
+                  <p className={classNames(styles.text, styles.greyText)}>At the meeting</p>
+                  <ParticipantsBadge count={1}/>
+                  <p className={styles.text}>{room?.count === 1 ? 'participant' : 'participants'}</p>
+                </Flex>
+              ) : (
+                <Flex
+                  mt={isMobile ? 24 : 22}
+                  color="#555555"
+                  flexDirection="column"
+                  gap={8}
+                >
+                  <CustomCheckbox
+                    label={"End-to-end encryption (E2EE)"}
+                    checked={e2ee}
+                    setChecked={setE2ee}
+                    isDisabled={isJoin}
+                  />
+
+                  <p className={styles.text}>
+                    {'Meeting time limit is 30 minutes. \n' +
+                      'The number of participants is up to 10 people.'}
+                  </p>
+                </Flex>
               )}
             </Flex>
           </Flex>

@@ -6,7 +6,10 @@ import classNames from 'classnames'
 const ParticipantsBadge = ({count, isCall}) => {
   return (
     <div className={classNames(styles.container, isCall && styles.isCall)}>
-      <img src={ParticipantsIcon} />
+      <img
+        src={ParticipantsIcon}
+        alt={'person icon'}
+      />
       {count}
     </div>
   )

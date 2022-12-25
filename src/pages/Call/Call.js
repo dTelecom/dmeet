@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useRef, useState} from 'react'
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import {Header} from '../../components/Header/Header';
 import styles from './Call.module.scss'
 import {useLocation, useNavigate, useParams} from 'react-router-dom';
@@ -8,8 +8,7 @@ import VideoControls from '../../components/VideoControls/VideoControls';
 import Footer from '../../components/Footer/Footer';
 import classNames from 'classnames';
 import ParticipantsBadge from '../../components/ParticipantsBadge/ParticipantsBadge';
-import {ChainIcon, WhiteTickIcon} from '../../assets';
-import CopyToClipboard from 'react-copy-to-clipboard/src';
+
 import Video from '../../components/Video/Video';
 import {PackedGrid} from 'react-packed-grid';
 import {useBreakpoints} from '../../hooks/useBreakpoints';
@@ -20,16 +19,12 @@ import {LocalStream} from 'js-sdk/lib/stream';
 import Client from 'js-sdk/lib/client';
 import * as e2ee from './e2ee'
 import axios from 'axios';
-
-const useE2ee = true;
+import {CopyToClipboardButton} from '../../components/CopyToClipboardButton/CopyToClipboardButton';
 
 const config = {
-  encodedInsertableStreams: true,
-  iceServers: [
-    {
-      urls: 'stun:stun.l.google.com:19302',
-    },
-  ],
+  encodedInsertableStreams: true, iceServers: [{
+    urls: 'stun:stun.l.google.com:19302',
+  },],
 };
 
 const Call = () => {
@@ -44,7 +39,6 @@ const Call = () => {
   const [participants, setParticipants] = useState([])
   const [loading, setLoading] = useState(true)
   const [inviteLink, setInviteLink] = useState('')
-  const [copied, setCopied] = useState(false)
   const [lastRemote, setLastRemote] = useState(0)
   const {
     constraints,
@@ -57,27 +51,13 @@ const Call = () => {
     defaultConstraints
   } = useMediaConstraints(location.state?.callState, location.state?.audioEnabled, location.state?.videoEnabled);
   const localMedia = useRef()
-  const timer = useRef()
   const streams = useRef({})
   const [mediaState, setMediaState] = useState({})
   const localUid = useRef()
   const localKey = useRef()
 
-  useEffect(() => {
-    return () => {
-      clearTimeout(timer.current);
-    };
-  }, []);
-
-  function onCopy() {
-    if (timer.current) {
-      clearTimeout(timer.current);
-    }
-    setCopied(true);
-    timer.current = setTimeout(() => setCopied(false), 2000);
-  }
-
-  const name = (location.state?.name || (Math.random() + 1).toString(36).substring(7)) + (!sid ? ' (Host)' : '');
+  const name = useMemo(() => location.state?.name || (Math.random() + 1).toString(36).substring(7), [location.state?.name])
+  const useE2ee = useMemo(() => Boolean(location.state?.e2ee), [location.state?.e2ee])
 
   const started = useRef(false)
 
@@ -146,8 +126,7 @@ const Call = () => {
     LocalStream.getUserMedia({
       resolution: 'vga',
       audio: true,
-      video: constraints.video || defaultConstraints.video,
-      // codec: params.has('codec') ? params.get('codec') : 'vp8',
+      video: constraints.video || defaultConstraints.video, // codec: params.has('codec') ? params.get('codec') : 'vp8',
       codec: 'vp8',
       sendEmptyOnMute: false,
     }).then(async (media) => {
@@ -166,7 +145,7 @@ const Call = () => {
       if (useE2ee) {
         e2ee.setKey(new TextEncoder().encode(localKey.current))
         clientLocal.current.transports[0].pc.getSenders().forEach(e2ee.setupSenderTransform);
-        clientLocal.current.transports[1].pc.addEventListener('track', (e)=>{
+        clientLocal.current.transports[1].pc.addEventListener('track', (e) => {
           e2ee.setupReceiverTransform(e.receiver);
         });
       }
@@ -174,32 +153,29 @@ const Call = () => {
       streams.current[media.id] = media
       setMediaState(prev => ({
         ...prev, [localUid.current]: {
-          audio: audioEnabled,
-          video: videoEnabled
+          audio: audioEnabled, video: videoEnabled
         }
       }))
 
       onJoin({
         participant: {
-          uid: localUid.current,
-          streamID: media.id,
-          name,
-          sid
+          uid: localUid.current, streamID: media.id, name, sid
         }
       })
       setLoading(false)
     })
       .catch(console.error);
-  }, [audioEnabled, constraints.audio?.exact, constraints.video, defaultConstraints.video, name, sid, videoEnabled])
+  }, [audioEnabled, constraints.audio?.exact, constraints.video, defaultConstraints.video, name, sid, useE2ee, videoEnabled])
 
   const start = useCallback(async () => {
     try {
       let url = 'https://meet.dmeet.org/api/room/create';
-      let data = {name: name};
+      let data = {name};
       if (sid !== undefined) {
         data.sid = sid
         url = 'https://meet.dmeet.org/api/room/join';
       } else {
+        data.e2ee = useE2ee
         data.title = `${name} room`
         data.callID = makeId(16)
       }
@@ -253,7 +229,7 @@ const Call = () => {
     } catch (errors) {
       console.error(errors);
     }
-  }, [hangup, name, onLeave, publish, sendState, sid])
+  }, [hangup, name, onLeave, publish, sendState, sid, useE2ee])
 
   const loadMedia = useCallback(async () => {
     // HACK: dev use effect fires twice
@@ -291,7 +267,7 @@ const Call = () => {
     console.log('[onParticipantsEvent]', participants)
     if (!participants) return
     setParticipants(Object.values(participants))
-      setLastRemote(Date.now())
+    setLastRemote(Date.now())
   }
 
   const onStream = ({participant}) => {
@@ -348,13 +324,11 @@ const Call = () => {
     }
     onMediaToggle(type)
     setMediaState(prev => ({
-      ...prev,
-      [localUid.current]: {...prev[localUid.current], [type]: !prev[localUid.current][type]}
+      ...prev, [localUid.current]: {...prev[localUid.current], [type]: !prev[localUid.current][type]}
     }))
   }, [constraints, onMediaToggle])
 
-  return (
-    <Box
+  return (<Box
       className={styles.container}
     >
       <Header>
@@ -363,18 +337,7 @@ const Call = () => {
           gap={'16px'}
         >
           <ParticipantsBadge count={participants?.length}/>
-          <CopyToClipboard
-            onCopy={onCopy}
-            text={inviteLink}
-          >
-            <button className={styles.inviteButton}>
-              <img
-                src={copied ? WhiteTickIcon : ChainIcon}
-                alt={'copy icon'}
-              />
-              {copied ? 'Copied!' : 'Copy invite link'}
-            </button>
-          </CopyToClipboard>
+          <CopyToClipboardButton text={inviteLink}/>
         </Flex>
       </Header>
 
@@ -383,8 +346,7 @@ const Call = () => {
         contentClass={styles.callContentContainer}
       >
 
-        {isMobile ? (
-          <Flex
+        {isMobile ? (<Flex
             minHeight={'calc(100% - 72px)'}
             flexDirection={'row'}
             flexWrap={'wrap'}
@@ -392,8 +354,7 @@ const Call = () => {
             overflowY={participants.length === 1 ? 'initial' : 'auto'}
             justifyContent={'space-between'}
           >
-            {participants?.map((participant, index) => (
-              <Box
+            {participants?.map((participant, index) => (<Box
                 key={participant.streamID}
                 maxHeight={participants.length === 1 ? 'auto' : 'calc((100vh - 72px - 48px - 88px) / 2)'}
                 width={participants.length === 1 ? '100%' : 'calc(50% - 8px)'}
@@ -406,34 +367,24 @@ const Call = () => {
                   participant={participant}
                   stream={streams.current[participant.streamID]}
                   isCurrentUser={participant.uid === localUid.current}
-                  name={participant.name}
                   mediaState={mediaState[participant.uid]}
                 />
-              </Box>
-            ))}
-          </Flex>
-        ) : (
-          <PackedGrid
+              </Box>))}
+          </Flex>) : (<PackedGrid
             className={classNames(styles.videoContainer)}
             boxAspectRatio={656 / 496}
           >
-            {participants?.map((participant, index) => (
-                <Video
-                  key={participant.streamID + index}
-                  participant={participant}
-                  stream={streams.current[participant.streamID]}
-                  isCurrentUser={participant.uid === localUid.current}
-                  name={participant.name}
-                  mediaState={mediaState[participant.uid]}
-                />
-              )
-            )}
-          </PackedGrid>
-        )}
+            {participants?.map((participant, index) => (<Video
+                key={participant.streamID + index}
+                participant={participant}
+                stream={streams.current[participant.streamID]}
+                isCurrentUser={participant.uid === localUid.current}
+                mediaState={mediaState[participant.uid]}
+              />))}
+          </PackedGrid>)}
 
 
-        {!loading && (
-          <div className={styles.videoControls}>
+        {!loading && (<div className={styles.videoControls}>
             <VideoControls
               devices={devices}
               onHangUp={hangup}
@@ -447,13 +398,11 @@ const Call = () => {
               participantsCount={participants.length}
               isCall
             />
-          </div>
-        )}
+          </div>)}
 
       </Container>
       <Footer/>
-    </Box>
-  )
+    </Box>)
 }
 
 export default Call

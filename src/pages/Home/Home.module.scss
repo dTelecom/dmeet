@@ -17,7 +17,7 @@
 }
 
 .videoContainer {
-	border: 2px solid #161F41;
+	border: 2px solid #252728;
 	border-radius: 10px;
 	display: flex;
 	flex-direction: column;
@@ -69,14 +69,16 @@
 .joinContainer {
 	flex-direction: column;
 	padding-left: 0;
-	padding-top: 12px;
 	margin: 0 auto;
+
 	@media (min-width: 900px) {
+		padding-top: 12px;
 		margin: 0;
+		min-width: 420px;
 	}
 
 	.title {
-		background: linear-gradient(97.76deg, #5F8AFA 0%, #A463B0 98.77%);
+		background: #fff;
 		-webkit-background-clip: text;
 		-webkit-text-fill-color: transparent;
 		font-weight: 700;
@@ -109,7 +111,7 @@
 	}
 
 	.buttonContainer {
-		height: 43px;
+		height: 52px;
 
 		@media (min-width: 900px) {
 			height: 72px;
@@ -120,15 +122,12 @@
 		font-weight: 400;
 		font-size: 14px;
 		line-height: 17px;
-		color: #96B9EB;
-		opacity: 0.4;
 		white-space: pre;
-		width: 100%;
-		margin-top: 24px;
+		width: fit-content;
+	}
 
-		@media (min-width: 900px) {
-			margin-top: 32px;
-		}
+	.greyText {
+		color: #D5D4D8;
 	}
 
 	.inviteText {

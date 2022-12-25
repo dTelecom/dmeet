@@ -4,7 +4,7 @@ import {MutedAudio, MutedVideo, SignalIcon, VideoPlaceholder} from '../../assets
 import {Box} from '@chakra-ui/react';
 import {useBreakpoints} from '../../hooks/useBreakpoints';
 
-const Video = ({participant, stream, isCurrentUser, name, mediaState}) => {
+const Video = ({participant, stream, isCurrentUser, mediaState}) => {
   const container = useRef()
   const videoElement = useRef();
   const {isMobile} = useBreakpoints();
@@ -14,10 +14,6 @@ const Video = ({participant, stream, isCurrentUser, name, mediaState}) => {
       videoElement.current.srcObject = stream
     }
   })
-
-  // if (mediaState === undefined) {
-  //   return null
-  // }
 
   return (
     <Box
@@ -45,7 +41,9 @@ const Video = ({participant, stream, isCurrentUser, name, mediaState}) => {
             src={SignalIcon}
             alt={'signal strength icon'}
           />
-          <p id={'badgeText-' + participant.streamID}>{decodeURIComponent(name)}</p>
+          <p id={'badgeText-' + participant.streamID}>
+            {participant.name}{participant.isHost ? ' (Host)' : ''}
+          </p>
         </div>
 
 

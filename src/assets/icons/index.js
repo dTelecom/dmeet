@@ -8,13 +8,15 @@ import ArrowDownIcon from './arrowDown.svg'
 import dTelecomLogo from './dtelecomlogo.svg'
 import ParticipantsIcon from './participants.svg'
 import ChainIcon from './chain.svg'
-import WhiteTickIcon from './whiteTick.svg'
+import WhiteTickIcon from './tick.svg'
 import VideoPlaceholder from './videoPlacholder.svg'
 import SignalIcon from './signal.svg'
 import HangUpIcon from './hangUpIcon.svg'
 import MutedAudio from './mutedAudio.svg'
 import MutedVideo from './mutedVideo.svg'
 import ArrowDisabledDown from './arrowDisabled.svg'
+import CheckboxOffIcon from './checboxOff.svg'
+import CheckboxOnIcon from './checkboxOn.svg'
 
 export {
   FaceIcon,
@@ -34,4 +36,6 @@ export {
   MutedAudio,
   MutedVideo,
   ArrowDisabledDown,
+  CheckboxOffIcon,
+  CheckboxOnIcon,
 }
