@@ -22,7 +22,7 @@ import axios from 'axios';
 import {CopyToClipboardButton} from '../../components/CopyToClipboardButton/CopyToClipboardButton';
 
 const config = {
-  encodedInsertableStreams: true, iceServers: [{
+  encodedInsertableStreams: false, iceServers: [{
     urls: 'stun:stun.l.google.com:19302',
   },],
 };
@@ -141,7 +141,6 @@ const Call = () => {
       }
 
       await clientLocal.current.publish(media)
-
       if (useE2ee) {
         e2ee.setKey(new TextEncoder().encode(localKey.current))
         clientLocal.current.transports[0].pc.getSenders().forEach(e2ee.setupSenderTransform);
@@ -192,6 +191,10 @@ const Call = () => {
 
       const _signalLocal = new IonSFUJSONRPCSignal(randomServer);
       signalLocal.current = _signalLocal
+
+      if (useE2ee) {
+        config.encodedInsertableStreams = true
+      }
 
       const _clientLocal = new Client(_signalLocal, config)
       clientLocal.current = _clientLocal
