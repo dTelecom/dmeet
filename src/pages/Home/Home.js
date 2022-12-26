@@ -134,7 +134,7 @@ const Home = ({isJoin = false}) => {
   }
 
   const loadRoom = async () => {
-    axios.post('https://meet.dmeet.org/api/room/info', {sid: sid}).then((response) => {
+    axios.post('https://app.dmeet.org/api/room/info', {sid: sid}).then((response) => {
       setRoom(response.data)
       if (response.data.e2ee) {
         setE2ee(response.data.e2ee)

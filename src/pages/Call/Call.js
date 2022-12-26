@@ -168,11 +168,11 @@ const Call = () => {
 
   const start = useCallback(async () => {
     try {
-      let url = 'https://meet.dmeet.org/api/room/create';
+      let url = 'https://app.dmeet.org/api/room/create';
       let data = {name};
       if (sid !== undefined) {
         data.sid = sid
-        url = 'https://meet.dmeet.org/api/room/join';
+        url = 'https://app.dmeet.org/api/room/join';
       } else {
         data.e2ee = useE2ee
         data.title = `${name} room`
