@@ -13,7 +13,6 @@ import Video from '../../components/Video/Video';
 import {PackedGrid} from 'react-packed-grid';
 import {useBreakpoints} from '../../hooks/useBreakpoints';
 import {useMediaConstraints} from '../../hooks/useMediaConstraints';
-import {makeId} from './utils';
 import {IonSFUJSONRPCSignal} from 'js-sdk/lib/signal/json-rpc-impl';
 import {LocalStream} from 'js-sdk/lib/stream';
 import Client from 'js-sdk/lib/client';
@@ -176,7 +175,6 @@ const Call = () => {
       } else {
         data.e2ee = useE2ee
         data.title = `${name} room`
-        data.callID = makeId(16)
       }
       const response = await axios.post(url, data);
       const randomServer = response.data.url;
