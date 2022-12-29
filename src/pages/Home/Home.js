@@ -16,6 +16,7 @@ import {CustomCheckbox} from '../../components/Checkbox/CustomCheckbox';
 import {loadDevices} from '../../utils/loadDevices';
 import {FaceIcon, KeyIcon} from '../../assets';
 import {useBreakpoints} from '../../hooks/useBreakpoints';
+import {utils} from 'near-api-js';
 
 const Home = () => {
   const {isMobile} = useBreakpoints()
@@ -133,8 +134,8 @@ const Home = () => {
   }
 
   const disabled = useMemo(() => {
-    return !values.name || !values.roomName || !hasVideo
-  }, [values, hasVideo])
+      return !values.name || !values.roomName || !hasVideo
+    }, [values, hasVideo])
 
   const title = 'Create a Web3 Video Room'
 
@@ -145,8 +146,8 @@ const Home = () => {
         audioEnabled,
         videoEnabled,
         ...values,
-        viewerPrice: values.viewer ? values.viewerPrice : '',
-        participantPrice: values.participant ? values.participantPrice : '',
+        viewerPrice: values.viewer ? utils.format.parseNearAmount(values.viewerPrice) : '',
+        participantPrice: values.participant ? utils.format.parseNearAmount(values.participantPrice) : '',
       }
     })
   }

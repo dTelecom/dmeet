@@ -10,15 +10,23 @@
 
 	img {
 		width: 100%;
-		margin-bottom: 24px;
+		margin-bottom: 16px;
+
+		@media (min-width: 900px) {
+			margin-bottom: 24px;
+		}
 	}
 
 	p {
-		margin-bottom: 24px;
+		margin-bottom: 16px;
 		font-size: 14px;
 		line-height: 17px;
 		text-align: center;
 		color: #555555;
+
+		@media (min-width: 900px) {
+			margin-bottom: 24px;
+		}
 	}
 
 	.button {

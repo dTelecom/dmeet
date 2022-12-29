@@ -3,15 +3,17 @@ import {Header} from '../../components/Header/Header';
 import {useLocation, useNavigate, useParams} from 'react-router-dom';
 import ParticipantsBadge from '../../components/ParticipantsBadge/ParticipantsBadge';
 import {Flex} from '@chakra-ui/react';
-import styles from './JoinModeSelect.module.scss';
+import styles from './JoinViewer.module.scss';
 import Footer from '../../components/Footer/Footer';
 import {Container} from '../../components/Container/Container';
 import Input from '../../components/Input/Input';
 import {FaceIcon} from '../../assets';
 import {Button} from '../../components/Button/Button';
 import {utils} from 'near-api-js';
+import {useBreakpoints} from '../../hooks/useBreakpoints';
 
 export const JoinViewer = () => {
+  const {isMobile} = useBreakpoints()
   const navigate = useNavigate()
   const location = useLocation()
   const {sid} = useParams()
@@ -25,7 +27,7 @@ export const JoinViewer = () => {
 
   const onJoin = () => {
     // TODO: pay?
-    navigate('/call/' + sid, {name, noPublish: true});
+    navigate('/call/' + sid, {state: {name, noPublish: true}});
   }
 
   return (
@@ -49,11 +51,11 @@ export const JoinViewer = () => {
           alignItems={'center'}
         >
           <h1 className={styles.title}>
-            {room.hostName} invites you
+            {room.hostName}{(isMobile ? '\n' : ' ') + 'invites you'}
           </h1>
 
           <Flex
-            my={40}
+            my={isMobile ? 24 : 40}
             gap={'30px'}
             width={'100%'}
             maxWidth={'420px'}
@@ -72,10 +74,15 @@ export const JoinViewer = () => {
             />
           </Flex>
 
+          <Flex mb={12}>
+            <span className={styles.subtitle}>Join as a viewer:</span>
+          </Flex>
+
           <div className={styles.button}>
             <Button
               text={room.viewerPrice !== '' ? utils.format.formatNearAmount(room.viewerPrice) + ' NEAR' : 'Free'}
               onClick={onJoin}
+              disabled={!name}
             />
           </div>
 

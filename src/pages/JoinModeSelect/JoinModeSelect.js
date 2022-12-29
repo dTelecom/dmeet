@@ -18,7 +18,7 @@ export const JoinModeSelect = () => {
   const [room, setRoom] = useState()
 
   const loadRoom = async () => {
-    axios.post('https://meet.dmeet.org/api/room/info', {sid})
+    axios.post('https://app.dmeet.org/api/room/info', {sid})
       .then((response) => {
         setRoom(response.data)
       })

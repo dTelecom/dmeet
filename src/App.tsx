@@ -6,6 +6,7 @@ import Call from './pages/Call/Call';
 import {JoinModeSelect} from "./pages/JoinModeSelect/JoinModeSelect";
 import Join from "./pages/JoinParticipant/JoinParticipant";
 import {JoinViewer} from "./pages/JoinViewer/JoinViewer";
+import './App.scss';
 
 const App = () => {
   return (

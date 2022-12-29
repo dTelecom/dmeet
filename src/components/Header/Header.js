@@ -13,7 +13,7 @@ export const Header = observer(({children, centered, title}) => {
     <Flex
       flexGrow={1}
       width={!isMobile ? '25%' : 'initial'}
-      justifyContent={centered ? 'center' : 'initial'}
+      justifyContent={centered && !children ? 'center' : 'initial'}
     >
       <div className={styles.logoContainer}>
         <img

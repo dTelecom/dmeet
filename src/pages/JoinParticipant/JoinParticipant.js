@@ -184,7 +184,7 @@ const JoinParticipant = () => {
             <h1 className={styles.title}>{title}</h1>
 
             <Input
-              labe={'Enter your name:'}
+              label={'Enter your name:'}
               value={name}
               onChange={setName}
               placeholder={'John'}

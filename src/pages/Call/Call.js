@@ -13,7 +13,6 @@ import Video from '../../components/Video/Video';
 import {PackedGrid} from 'react-packed-grid';
 import {useBreakpoints} from '../../hooks/useBreakpoints';
 import {useMediaConstraints} from '../../hooks/useMediaConstraints';
-import {makeId} from './utils';
 import {IonSFUJSONRPCSignal} from 'js-sdk/lib/signal/json-rpc-impl';
 import {LocalStream} from 'js-sdk/lib/stream';
 import Client from 'js-sdk/lib/client';
@@ -59,6 +58,7 @@ const Call = () => {
 
   const name = useMemo(() => location.state?.name || (Math.random() + 1).toString(36).substring(7), [location.state?.name])
   const useE2ee = useMemo(() => Boolean(location.state?.e2ee), [location.state?.e2ee])
+  const noPublish = useMemo(() => Boolean(location.state?.noPublish), [location.state?.noPublish])
 
   const started = useRef(false)
 
@@ -81,6 +81,8 @@ const Call = () => {
   }, [])
 
   const sendState = useCallback(() => {
+    if (noPublish) return
+
     if (signalLocal.current?.socket.readyState === 1) {
       console.log('[sendState]', 'audio enabled: ' + audioEnabled, 'video enabled: ' + videoEnabled)
 
@@ -92,7 +94,7 @@ const Call = () => {
         muted: !videoEnabled, kind: 'video'
       })
     }
-  }, [audioEnabled, videoEnabled])
+  }, [audioEnabled, noPublish, videoEnabled])
 
   useEffect(() => {
     sendState()
@@ -157,11 +159,6 @@ const Call = () => {
         }
       }))
 
-      onJoin({
-        participant: {
-          uid: localUid.current, streamID: media.id, name, sid
-        }
-      })
       setLoading(false)
     })
       .catch(console.error);
@@ -169,15 +166,15 @@ const Call = () => {
 
   const start = useCallback(async () => {
     try {
-      let url = 'https://meet.dmeet.org/api/room/create';
+      let url = 'https://app.dmeet.org/api/room/create';
       let data = {name};
       if (sid !== undefined) {
         data.sid = sid
-        url = 'https://meet.dmeet.org/api/room/join';
+        data.noPublish = noPublish
+        url = 'https://app.dmeet.org/api/room/join';
       } else {
         data.e2ee = useE2ee
         data.title = `${name} room`
-        data.callID = makeId(16)
         data.viewerPrice = location.state?.viewerPrice
         data.participantPrice = location.state?.participantPrice
       }
@@ -225,7 +222,12 @@ const Call = () => {
       _signalLocal.onopen = async () => {
         clientLocal.current.join(response.data.token, response.data.signature);
         sendState()
-        void publish()
+
+        if (!noPublish) {
+          void publish()
+        } else {
+          setLoading(false)
+        }
       }
       _signalLocal.on_notify('onJoin', onJoin);
       _signalLocal.on_notify('onLeave', onLeave);
@@ -235,7 +237,7 @@ const Call = () => {
     } catch (errors) {
       console.error(errors);
     }
-  }, [hangup, name, onLeave, publish, sendState, sid, useE2ee])
+  }, [name, sid, useE2ee, onLeave, noPublish, location.state, hangup, sendState, publish])
 
   const loadMedia = useCallback(async () => {
     // HACK: dev use effect fires twice
@@ -392,6 +394,7 @@ const Call = () => {
           toggleAudio={() => toggleMedia('audio')}
           toggleVideo={() => toggleMedia('video')}
           participantsCount={participants.length}
+          noPublish={noPublish}
           isCall
         />
       </div>)}
