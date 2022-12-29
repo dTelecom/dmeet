@@ -1,36 +1,31 @@
-import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
+import React, {useCallback, useEffect, useRef, useState} from 'react'
 import {Header} from '../../components/Header/Header';
 import {Button} from '../../components/Button/Button';
-import styles from './Home.module.scss'
+import styles from './JoinParticipant.module.scss'
 import {observer} from 'mobx-react';
-import {useNavigate} from 'react-router-dom';
+import {useLocation, useNavigate, useParams} from 'react-router-dom';
 import {Container} from '../../components/Container/Container';
 import {Box, Flex} from '@chakra-ui/react';
 import Input from '../../components/Input/Input';
-import NumberInput from '../../components/NumberInput/NumberInput';
 import VideoControls from '../../components/VideoControls/VideoControls';
 import Footer from '../../components/Footer/Footer';
 import {createVideoElement, hideMutedBadge, showMutedBadge} from '../Call/utils';
 import {useMediaConstraints} from '../../hooks/useMediaConstraints';
-import {CustomCheckbox} from '../../components/Checkbox/CustomCheckbox';
-import {loadDevices} from '../../utils/loadDevices';
-import {FaceIcon, KeyIcon} from '../../assets';
+import ParticipantsBadge from '../../components/ParticipantsBadge/ParticipantsBadge';
 import {useBreakpoints} from '../../hooks/useBreakpoints';
+import {loadDevices} from '../../utils/loadDevices';
+import {FaceIcon} from '../../assets';
+import {utils} from 'near-api-js';
 
-const Home = () => {
-  const {isMobile} = useBreakpoints()
+const JoinParticipant = () => {
   const navigate = useNavigate()
+  const {isMobile} = useBreakpoints()
+  const [name, setName] = useState('')
   const [hasVideo, setHasVideo] = useState(false)
   const [devices, setDevices] = useState([])
-  const [values, setValues] = useState({
-    viewer: true,
-    viewerPrice: 0,
-    e2ee: true,
-    participant: true,
-    participantPrice: 0,
-    roomName: '',
-    name: '',
-  });
+  const location = useLocation()
+  const [room] = useState(location.state?.room)
+  const [e2ee] = useState(false)
   const {
     constraints,
     onDeviceChange,
@@ -41,16 +36,13 @@ const Home = () => {
     selectedVideoId,
     constraintsState,
   } = useMediaConstraints();
+  const {sid} = useParams();
   const videoContainer = useRef()
   const localVideo = useRef()
 
   useEffect(() => {
     void loadMedia(constraints)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  const onChange = useCallback((key, value) => {
-    setValues(prev => ({...prev, [key]: value}))
   }, [])
 
   const loadMedia = useCallback(async (config) => {
@@ -132,21 +124,19 @@ const Home = () => {
     }
   }
 
-  const disabled = useMemo(() => {
-    return !values.name || !values.roomName || !hasVideo
-  }, [values, hasVideo])
+  const disabled = !name || !hasVideo;
 
-  const title = 'Create a Web3 Video Room'
+  const title = `${room?.hostName}\ninvites you`
+  const buttonText = room.participantPrice !== '' ? utils.format.formatNearAmount(room.participantPrice) + ' NEAR' : 'Free'
 
-  const onCreateMeeting = () => {
-    navigate('/call', {
+  const onJoin = () => {
+    navigate('/call/' + sid, {
       state: {
+        name,
         callState: constraintsState,
         audioEnabled,
         videoEnabled,
-        ...values,
-        viewerPrice: values.viewer ? values.viewerPrice : '',
-        participantPrice: values.participant ? values.participantPrice : '',
+        e2ee,
       }
     })
   }
@@ -154,13 +144,16 @@ const Home = () => {
   return (
     <>
       <Header
-        title={isMobile ? undefined : title}
-        centered={isMobile}
-      />
-
-      {isMobile && (
-        <h1 className={styles.title}>{title}</h1>
-      )}
+        title={room?.name}
+        centered
+      >
+        <Flex
+          h={40}
+          alignItems={'center'}
+        >
+          <span className={styles.smallText}>at the room:</span>&nbsp;<ParticipantsBadge count={room?.count}/>
+        </Flex>
+      </Header>
 
       <Container>
         <Flex
@@ -184,97 +177,43 @@ const Home = () => {
             </div>
           </div>
 
-          <Flex maxWidth={isMobile ? 'initial' : '420px'}>
-            <Flex
-              className={styles.joinContainer}
+
+          <Flex
+            className={styles.joinContainer}
+          >
+            <h1 className={styles.title}>{title}</h1>
+
+            <Input
+              labe={'Enter your name:'}
+              value={name}
+              onChange={setName}
+              placeholder={'John'}
+              icon={FaceIcon}
+            />
+
+            <Box mt={'32px'}>
+              <p className={styles.label}>Join as a Participant:</p>
+            </Box>
+            <div
+              className={styles.buttonContainer}
             >
-              <Input
-                value={values.name}
-                onChange={(value) => onChange('name', value)}
-                placeholder={'John'}
-                icon={FaceIcon}
-                label={'Enter your name:'}
+              <Button
+                onClick={onJoin}
+                text={buttonText}
+                disabled={disabled}
               />
+            </div>
 
-              <Box my={'24px'}>
-                <Input
-                  value={values.roomName}
-                  onChange={(value) => onChange('roomName', value)}
-                  placeholder={'What is Web3?'}
-                  icon={KeyIcon}
-                  label={'Enter a room name:'}
-                />
-              </Box>
-
-              <Flex
-                gap={'20px'}
-                width="100%"
-              >
-                <Flex
-                  flexGrow={1}
-                  flexDirection="column"
-                  gap={'12px'}
-                  width="calc(50% - 10px)"
-                >
-                  <CustomCheckbox
-                    label={'Viewer'}
-                    checked={values.viewer}
-                    setChecked={(checked) => onChange('viewer', checked)}
-                  />
-
-                  <NumberInput
-                    value={values.viewerPrice}
-                    onChange={(value) => onChange('viewerPrice', value)}
-                    suffix=" NEAR"
-                    disabled={!values.viewer}
-                  />
-                </Flex>
-
-                <Flex
-                  flexGrow={1}
-                  flexDirection="column"
-                  gap={'12px'}
-                  width="calc(50% - 10px)"
-                >
-                  <CustomCheckbox
-                    label={'Participant'}
-                    checked={values.participant}
-                    setChecked={(checked) => onChange('participant', checked)}
-                  />
-
-                  <NumberInput
-                    value={values.participantPrice}
-                    onChange={(value) => onChange('participantPrice', value)}
-                    suffix=" NEAR"
-                    disabled={!values.participant}
-                  />
-                </Flex>
-              </Flex>
-
-              <Box
-                width={'100%'}
-                marginTop="24px"
-              >
-                <CustomCheckbox
-                  label={'End-to-end encryption (E2EE)'}
-                  checked={values.e2ee}
-                  setChecked={(checked) => onChange('e2ee', checked)}
-                />
-              </Box>
-
-              <Box
-                marginTop={isMobile ? '24px' : '56px'}
-                width={'100%'}
-                boxSizing={'border-box'}
-                className={styles.buttonContainer}
-              >
-                <Button
-                  onClick={onCreateMeeting}
-                  text={'Create a Video Room'}
-                  disabled={disabled}
-                />
-              </Box>
-
+            <Flex
+              mt={isMobile ? 24 : 'auto'}
+              color="#555555"
+              flexDirection="column"
+              gap={8}
+            >
+              <p className={styles.text}>
+                {'End-to-end encryption is enabled,\n' +
+                  'we recommend using the Google Chrome browser.'}
+              </p>
             </Flex>
           </Flex>
         </Flex>
@@ -285,4 +224,4 @@ const Home = () => {
   )
 }
 
-export default observer(Home)
+export default observer(JoinParticipant)

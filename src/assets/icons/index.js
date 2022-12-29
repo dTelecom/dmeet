@@ -17,6 +17,7 @@ import MutedVideo from './mutedVideo.svg'
 import ArrowDisabledDown from './arrowDisabled.svg'
 import CheckboxOffIcon from './checboxOff.svg'
 import CheckboxOnIcon from './checkboxOn.svg'
+import KeyIcon from './keyIcon.svg'
 
 export {
   FaceIcon,
@@ -38,4 +39,5 @@ export {
   ArrowDisabledDown,
   CheckboxOffIcon,
   CheckboxOnIcon,
+  KeyIcon,
 }

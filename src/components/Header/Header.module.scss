@@ -2,8 +2,10 @@
 	height: 72px;
 	align-items: center;
 	display: flex;
-	justify-content: space-between;
+	justify-content: space-evenly;
 	padding: 0 24px;
+	width: 100%;
+	box-sizing: border-box;
 
 	@media (min-width: 900px) {
 		height: 96px;
@@ -29,8 +31,16 @@
 		}
 	}
 
+	.title {
+		font-weight: 700;
+		font-size: 32px;
+		line-height: 39px;
+		text-align: center;
+	}
+
 	.controlContainer {
 		display: flex;
 		justify-content: flex-end;
+		width: 100%;
 	}
 }

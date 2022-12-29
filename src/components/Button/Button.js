@@ -1,7 +1,7 @@
 import React from 'react'
 import styles from './Button.module.scss'
 
-export const Button = ({text, onClick, disabled}) => {
+export const Button = ({text, onClick, disabled = false}) => {
   return (
     <button className={styles.button} onClick={disabled ? undefined : onClick} disabled={disabled}>
       {text}

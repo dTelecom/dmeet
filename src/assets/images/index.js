@@ -1,3 +1,5 @@
 import Logo from './logo.svg'
+import JoinScreenshotViewer from './joinScreenshotViewer.png'
+import JoinScreenshotParticipant from './joinScreenshotParticipant.png'
 
-export {Logo}
+export {Logo, JoinScreenshotParticipant, JoinScreenshotViewer}

@@ -21,7 +21,7 @@ export const CustomCheckbox = ({label, checked, setChecked, ...checkboxProps}: I
     return <Box
       w={24}
       h={24}
-      ml={8}
+      ml={12}
     >
       <img
         src={src}
