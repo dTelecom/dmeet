@@ -174,7 +174,7 @@ const Call = () => {
         url = 'https://app.dmeet.org/api/room/join';
       } else {
         data.e2ee = useE2ee
-        data.title = `${name} room`
+        data.title = location.state?.title
         data.viewerPrice = location.state?.viewerPrice
         data.participantPrice = location.state?.participantPrice
       }
