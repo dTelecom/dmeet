@@ -1,25 +1,32 @@
 import React, {useRef} from 'react'
 import styles from './Input.module.scss'
-import {FaceIcon} from '../../assets';
+import {Box} from '@chakra-ui/react';
 
-const Input = ({value, onChange, placeholder}) => {
+const Input = ({value, onChange, placeholder, icon, label, containerStyle }) => {
   const inputRef = useRef();
 
   return (
-    <div
-      className={styles.inputContainer}
-      onClick={() => inputRef.current?.focus()}
-    >
-      <img src={FaceIcon}/>
-      <input
-        ref={inputRef}
-        className={styles.input}
-        value={value}
-        onChange={e => onChange(e.target.value)}
-        type="text"
-        placeholder={placeholder}
-      />
-    </div>
+    <Box style={containerStyle}>
+      {label && (
+        <p className={styles.label}>{label}</p>
+      )}
+
+      <div
+        className={styles.inputContainer}
+        onClick={() => inputRef.current?.focus()}
+      >
+        {icon && <img src={icon}/>}
+
+        <input
+          ref={inputRef}
+          className={styles.input}
+          value={value}
+          onChange={event => onChange(event.target.value)}
+          type="text"
+          placeholder={placeholder}
+        />
+      </div>
+    </Box>
   )
 }
 

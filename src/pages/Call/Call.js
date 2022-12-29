@@ -19,6 +19,7 @@ import Client from 'js-sdk/lib/client';
 import * as e2ee from './e2ee'
 import axios from 'axios';
 import {CopyToClipboardButton} from '../../components/CopyToClipboardButton/CopyToClipboardButton';
+import {loadDevices} from '../../utils/loadDevices';
 
 const config = {
   encodedInsertableStreams: false, iceServers: [{
@@ -57,6 +58,7 @@ const Call = () => {
 
   const name = useMemo(() => location.state?.name || (Math.random() + 1).toString(36).substring(7), [location.state?.name])
   const useE2ee = useMemo(() => Boolean(location.state?.e2ee), [location.state?.e2ee])
+  const noPublish = useMemo(() => Boolean(location.state?.noPublish), [location.state?.noPublish])
 
   const started = useRef(false)
 
@@ -79,6 +81,8 @@ const Call = () => {
   }, [])
 
   const sendState = useCallback(() => {
+    if (noPublish) return
+
     if (signalLocal.current?.socket.readyState === 1) {
       console.log('[sendState]', 'audio enabled: ' + audioEnabled, 'video enabled: ' + videoEnabled)
 
@@ -90,7 +94,7 @@ const Call = () => {
         muted: !videoEnabled, kind: 'video'
       })
     }
-  }, [audioEnabled, videoEnabled])
+  }, [audioEnabled, noPublish, videoEnabled])
 
   useEffect(() => {
     sendState()
@@ -129,7 +133,7 @@ const Call = () => {
       codec: 'vp8',
       sendEmptyOnMute: false,
     }).then(async (media) => {
-      loadDevices()
+      void loadDevices(setDevices)
       localMedia.current = media
       if (constraints.audio?.exact) {
         media.switchDevice('audio', constraints.audio?.exact)
@@ -155,11 +159,6 @@ const Call = () => {
         }
       }))
 
-      onJoin({
-        participant: {
-          uid: localUid.current, streamID: media.id, name, sid
-        }
-      })
       setLoading(false)
     })
       .catch(console.error);
@@ -171,10 +170,13 @@ const Call = () => {
       let data = {name};
       if (sid !== undefined) {
         data.sid = sid
+        data.noPublish = noPublish
         url = 'https://app.dmeet.org/api/room/join';
       } else {
         data.e2ee = useE2ee
         data.title = `${name} room`
+        data.viewerPrice = location.state?.viewerPrice
+        data.participantPrice = location.state?.participantPrice
       }
       const response = await axios.post(url, data);
       const randomServer = response.data.url;
@@ -220,7 +222,12 @@ const Call = () => {
       _signalLocal.onopen = async () => {
         clientLocal.current.join(response.data.token, response.data.signature);
         sendState()
-        void publish()
+
+        if (!noPublish) {
+          void publish()
+        } else {
+          setLoading(false)
+        }
       }
       _signalLocal.on_notify('onJoin', onJoin);
       _signalLocal.on_notify('onLeave', onLeave);
@@ -230,7 +237,7 @@ const Call = () => {
     } catch (errors) {
       console.error(errors);
     }
-  }, [hangup, name, onLeave, publish, sendState, sid, useE2ee])
+  }, [name, sid, useE2ee, onLeave, noPublish, location.state, hangup, sendState, publish])
 
   const loadMedia = useCallback(async () => {
     // HACK: dev use effect fires twice
@@ -239,16 +246,6 @@ const Call = () => {
 
     await start()
   }, [start])
-
-  const loadDevices = () => {
-    navigator.mediaDevices.enumerateDevices()
-      .then((devices) => {
-        setDevices(devices)
-      })
-      .catch((err) => {
-        console.error(`${err.name}: ${err.message}`);
-      });
-  }
 
   const onJoin = ({participant}) => {
     console.log('[onJoin]', participant)
@@ -330,80 +327,81 @@ const Call = () => {
   }, [constraints, onMediaToggle])
 
   return (<Box
-      className={styles.container}
-    >
-      <Header>
-        <Flex
-          className={styles.headerControls}
-          gap={'16px'}
-        >
-          <ParticipantsBadge count={participants?.length}/>
-          <CopyToClipboardButton text={inviteLink}/>
-        </Flex>
-      </Header>
-
-      <Container
-        containerClass={styles.callContainer}
-        contentClass={styles.callContentContainer}
+    className={styles.container}
+  >
+    <Header>
+      <Flex
+        className={styles.headerControls}
+        gap={'16px'}
       >
+        <ParticipantsBadge count={participants?.length}/>
+        <CopyToClipboardButton text={inviteLink}/>
+      </Flex>
+    </Header>
 
-        {isMobile ? (<Flex
-            minHeight={'calc(100% - 72px)'}
-            flexDirection={'row'}
-            flexWrap={'wrap'}
-            gap={'8px'}
-            overflowY={participants.length === 1 ? 'initial' : 'auto'}
-            justifyContent={'space-between'}
-          >
-            {participants?.map((participant, index) => (<Box
-                key={participant.streamID}
-                maxHeight={participants.length === 1 ? 'auto' : 'calc((100vh - 72px - 48px - 88px) / 2)'}
-                width={participants.length === 1 ? '100%' : 'calc(50% - 8px)'}
-                style={{
-                  aspectRatio: 480 / 640
-                }}
-              >
-                <Video
-                  key={participant.streamID + index}
-                  participant={participant}
-                  stream={streams.current[participant.streamID]}
-                  isCurrentUser={participant.uid === localUid.current}
-                  mediaState={mediaState[participant.uid]}
-                />
-              </Box>))}
-          </Flex>) : (<PackedGrid
-            className={classNames(styles.videoContainer)}
-            boxAspectRatio={656 / 496}
-          >
-            {participants?.map((participant, index) => (<Video
-                key={participant.streamID + index}
-                participant={participant}
-                stream={streams.current[participant.streamID]}
-                isCurrentUser={participant.uid === localUid.current}
-                mediaState={mediaState[participant.uid]}
-              />))}
-          </PackedGrid>)}
+    <Container
+      containerClass={styles.callContainer}
+      contentClass={styles.callContentContainer}
+    >
+
+      {isMobile ? (<Flex
+        minHeight={'calc(100% - 72px)'}
+        flexDirection={'row'}
+        flexWrap={'wrap'}
+        gap={'8px'}
+        overflowY={participants.length === 1 ? 'initial' : 'auto'}
+        justifyContent={'space-between'}
+      >
+        {participants?.map((participant, index) => (<Box
+          key={participant.streamID}
+          maxHeight={participants.length === 1 ? 'auto' : 'calc((100vh - 72px - 48px - 88px) / 2)'}
+          width={participants.length === 1 ? '100%' : 'calc(50% - 8px)'}
+          style={{
+            aspectRatio: 480 / 640
+          }}
+        >
+          <Video
+            key={participant.streamID + index}
+            participant={participant}
+            stream={streams.current[participant.streamID]}
+            isCurrentUser={participant.uid === localUid.current}
+            mediaState={mediaState[participant.uid]}
+          />
+        </Box>))}
+      </Flex>) : (<PackedGrid
+        className={classNames(styles.videoContainer)}
+        boxAspectRatio={656 / 496}
+      >
+        {participants?.map((participant, index) => (<Video
+          key={participant.streamID + index}
+          participant={participant}
+          stream={streams.current[participant.streamID]}
+          isCurrentUser={participant.uid === localUid.current}
+          mediaState={mediaState[participant.uid]}
+        />))}
+      </PackedGrid>)}
 
 
-        {!loading && (<div className={styles.videoControls}>
-            <VideoControls
-              devices={devices}
-              onHangUp={hangup}
-              videoEnabled={videoEnabled}
-              audioEnabled={audioEnabled}
-              onDeviceChange={onDeviceSelect}
-              selectedAudioId={selectedAudioId}
-              selectedVideoId={selectedVideoId}
-              toggleAudio={() => toggleMedia('audio')}
-              toggleVideo={() => toggleMedia('video')}
-              participantsCount={participants.length}
-              isCall
-            />
-          </div>)}
+      {!loading && (<div className={styles.videoControls}>
+        <VideoControls
+          devices={devices}
+          onHangUp={hangup}
+          videoEnabled={videoEnabled}
+          audioEnabled={audioEnabled}
+          onDeviceChange={onDeviceSelect}
+          selectedAudioId={selectedAudioId}
+          selectedVideoId={selectedVideoId}
+          toggleAudio={() => toggleMedia('audio')}
+          toggleVideo={() => toggleMedia('video')}
+          participantsCount={participants.length}
+          noPublish={noPublish}
+          isCall
+        />
+      </div>)}
 
-      </Container>
-      <Footer/>
-    </Box>)
+    </Container>
+    <Footer/>
+  </Box>)
 }
 
 export default Call

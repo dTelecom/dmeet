@@ -6,16 +6,14 @@ html {
 
 body {
   margin: 0;
-}
 
-:global(body) {
   min-height: 100vh;
   @supports (-webkit-touch-callout: none) {
     min-height: -webkit-fill-available;
   }
 }
 
-:global(#root) {
+#root {
   min-height: 100vh;
   @supports (-webkit-touch-callout: none) {
     min-height: -webkit-fill-available;

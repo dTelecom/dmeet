@@ -17,6 +17,7 @@ const VideoControls = ({
   selectedAudioId,
   isCall,
   participantsCount,
+  noPublish,
 }) => {
   return (
     <div className={classNames(styles.container, isCall && styles.containerCall)}>
@@ -26,24 +27,28 @@ const VideoControls = ({
         </div>
       )}
 
-      <SourceControl
-        onChange={(deviceID) => onDeviceChange('audio', deviceID)}
-        devices={devices.filter(d => d.kind === 'audioinput')}
-        enabled={audioEnabled}
-        toggleMute={toggleAudio}
-        selected={selectedAudioId}
-        isCall={isCall}
-      />
+      {!noPublish && (
+        <>
+          <SourceControl
+            onChange={(deviceID) => onDeviceChange('audio', deviceID)}
+            devices={devices.filter(d => d.kind === 'audioinput')}
+            enabled={audioEnabled}
+            toggleMute={toggleAudio}
+            selected={selectedAudioId}
+            isCall={isCall}
+          />
 
-      <SourceControl
-        onChange={(deviceID) => onDeviceChange('video', deviceID)}
-        devices={devices.filter(d => d.kind === 'videoinput')}
-        isVideo
-        enabled={videoEnabled}
-        toggleMute={toggleVideo}
-        selected={selectedVideoId}
-        isCall={isCall}
-      />
+          <SourceControl
+            onChange={(deviceID) => onDeviceChange('video', deviceID)}
+            devices={devices.filter(d => d.kind === 'videoinput')}
+            isVideo
+            enabled={videoEnabled}
+            toggleMute={toggleVideo}
+            selected={selectedVideoId}
+            isCall={isCall}
+          />
+        </>
+      )}
 
       {onHangUp && (
         <button
