@@ -27,7 +27,7 @@ export const JoinViewer = () => {
 
   const onJoin = () => {
     // TODO: pay?
-    navigate('/call/' + sid, {state: {name, noPublish: true}});
+    navigate('/call/' + sid, {state: {name, noPublish: true, e2ee: room.e2ee}});
   }
 
   return (

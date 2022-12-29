@@ -162,7 +162,7 @@ const Call = () => {
       setLoading(false)
     })
       .catch(console.error);
-  }, [audioEnabled, constraints.audio?.exact, constraints.video, defaultConstraints.video, name, sid, useE2ee, videoEnabled])
+  }, [audioEnabled, constraints.audio?.exact, constraints.video, defaultConstraints.video, useE2ee, videoEnabled])
 
   const start = useCallback(async () => {
     try {
