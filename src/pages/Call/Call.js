@@ -278,9 +278,20 @@ const Call = () => {
     console.log('[onParticipantsEvent]', participants);
     if (!participants) return;
     setParticipants(Object.values(participants));
+
+    // update media state from participants
+    const participantsMediaState = {};
+    Object.values(participants).forEach(participant => {
+      participantsMediaState[participant.uid] = {audio: !participant.audioMuted, video: !participant.videoMuted};
+    });
+    setMediaState(prev => ({
+      ...prev,
+      ...participantsMediaState,
+    }));
+
     setLastRemote(Date.now());
   };
-
+  console.log(mediaState);
   const onStream = ({participant}) => {
     console.log('[onStream]', participant);
 
