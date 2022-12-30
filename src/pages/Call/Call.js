@@ -332,8 +332,6 @@ const Call = () => {
     }));
   }, [constraints, onMediaToggle]);
 
-  console.log(participants, mediaState);
-
   const participantsList = useMemo(() => participants.filter((p) => p.noPublish !== true), [participants]);
 
   return (<Box
@@ -359,13 +357,13 @@ const Call = () => {
         flexDirection={'row'}
         flexWrap={'wrap'}
         gap={'8px'}
-        overflowY={participants.length === 1 ? 'initial' : 'auto'}
+        overflowY={participantsList.length === 1 ? 'initial' : 'auto'}
         justifyContent={'space-between'}
       >
         {participantsList?.map((participant, index) => (<Box
           key={participant.streamID}
-          maxHeight={participants.length === 1 ? 'auto' : 'calc((100vh - 72px - 48px - 88px) / 2)'}
-          width={participants.length === 1 ? '100%' : 'calc(50% - 8px)'}
+          maxHeight={participantsList.length === 1 ? 'auto' : 'calc((100vh - 72px - 48px - 88px) / 2)'}
+          width={participantsList.length === 1 ? '100%' : 'calc(50% - 8px)'}
           style={{
             aspectRatio: 480 / 640
           }}
@@ -403,7 +401,7 @@ const Call = () => {
           selectedVideoId={selectedVideoId}
           toggleAudio={() => toggleMedia('audio')}
           toggleVideo={() => toggleMedia('video')}
-          participantsCount={participants.length}
+          participantsCount={participantsList.length}
           noPublish={noPublish}
           isCall
         />
