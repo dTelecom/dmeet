@@ -159,6 +159,12 @@ const Call = () => {
         }
       }))
 
+      onJoin({
+        participant: {
+          uid: localUid.current, streamID: media.id, name, sid
+        }
+      })
+
       setLoading(false)
     })
       .catch(console.error);
