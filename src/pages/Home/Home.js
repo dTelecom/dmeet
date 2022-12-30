@@ -1,7 +1,7 @@
-import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {Header} from '../../components/Header/Header';
 import {Button} from '../../components/Button/Button';
-import styles from './Home.module.scss'
+import styles from './Home.module.scss';
 import {observer} from 'mobx-react';
 import {useNavigate} from 'react-router-dom';
 import {Container} from '../../components/Container/Container';
@@ -19,10 +19,10 @@ import {useBreakpoints} from '../../hooks/useBreakpoints';
 import {utils} from 'near-api-js';
 
 const Home = () => {
-  const {isMobile} = useBreakpoints()
-  const navigate = useNavigate()
-  const [hasVideo, setHasVideo] = useState(false)
-  const [devices, setDevices] = useState([])
+  const {isMobile} = useBreakpoints();
+  const navigate = useNavigate();
+  const [hasVideo, setHasVideo] = useState(false);
+  const [devices, setDevices] = useState([]);
   const [values, setValues] = useState({
     viewer: true,
     viewerPrice: 0,
@@ -32,6 +32,7 @@ const Home = () => {
     roomName: '',
     name: '',
   });
+
   const {
     constraints,
     onDeviceChange,
@@ -42,37 +43,37 @@ const Home = () => {
     selectedVideoId,
     constraintsState,
   } = useMediaConstraints();
-  const videoContainer = useRef()
-  const localVideo = useRef()
+  const videoContainer = useRef();
+  const localVideo = useRef();
 
   useEffect(() => {
-    void loadMedia(constraints)
+    void loadMedia(constraints);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, []);
 
   const onChange = useCallback((key, value) => {
-    setValues(prev => ({...prev, [key]: value}))
-  }, [])
+    setValues(prev => ({...prev, [key]: value}));
+  }, []);
 
   const loadMedia = useCallback(async (config) => {
     console.log('[loadMedia]', config);
     try {
       const stream = await navigator.mediaDevices.getUserMedia(config);
-      void loadDevices(setDevices)
+      void loadDevices(setDevices);
 
       if (!selectedVideoId && !selectedAudioId) {
         // set initial devices
         stream.getTracks().forEach(track => {
-            const deviceId = track.getSettings().deviceId
-            onDeviceChange(track.kind, deviceId)
+            const deviceId = track.getSettings().deviceId;
+            onDeviceChange(track.kind, deviceId);
           }
-        )
+        );
       }
 
       if (!videoContainer.current) {
-        setTimeout(() => loadMedia(config), 200)
+        setTimeout(() => loadMedia(config), 200);
       } else {
-        localVideo.current = stream
+        localVideo.current = stream;
         const video = createVideoElement({
           media: stream,
           muted: true,
@@ -80,64 +81,66 @@ const Home = () => {
           style: {width: '100%', height: '100%', transform: 'scale(-1, 1)'},
           audio: !!config.audio,
           video: !!config.video,
-        })
+        });
         video.style.transform = 'scale(-1, 1)';
 
-        videoContainer.current.innerHTML = ''
-        videoContainer.current.appendChild(video)
-        setHasVideo(true)
+        videoContainer.current.innerHTML = '';
+        videoContainer.current.appendChild(video);
+        setHasVideo(true);
       }
     } catch
       (err) {
-      console.error(err)
+      console.error(err);
     }
-  }, [onDeviceChange, selectedAudioId, selectedVideoId])
+  }, [onDeviceChange, selectedAudioId, selectedVideoId]);
 
   const onDeviceSelect = useCallback((type, deviceId) => {
-    const constraints = onDeviceChange(type, deviceId)
-    void loadMedia(constraints)
-  }, [loadMedia, onDeviceChange])
+    const constraints = onDeviceChange(type, deviceId);
+    void loadMedia(constraints);
+  }, [loadMedia, onDeviceChange]);
 
   function toggleAudio() {
     if (localVideo.current) {
-      const track = localVideo.current.getAudioTracks()[0]
+      const track = localVideo.current.getAudioTracks()[0];
       if (!track) {
-        onDeviceSelect('audio', true)
-        return
+        onDeviceSelect('audio', true);
+        return;
       }
       track.enabled = !audioEnabled;
       if (!audioEnabled) {
-        hideMutedBadge('audio', localVideo.current.id)
+        hideMutedBadge('audio', localVideo.current.id);
       } else {
-        showMutedBadge('audio', localVideo.current.id)
+        showMutedBadge('audio', localVideo.current.id);
       }
-      onMediaToggle('audio')
+      onMediaToggle('audio');
     }
   }
 
   function toggleVideo() {
     if (localVideo.current) {
-      const prevState = videoEnabled
-      const track = localVideo.current.getVideoTracks()[0]
+      const prevState = videoEnabled;
+      const track = localVideo.current.getVideoTracks()[0];
       if (!track) {
-        onDeviceSelect('video', true)
-        return
+        onDeviceSelect('video', true);
+        return;
       }
       track.enabled = !prevState;
       if (!prevState) {
-        hideMutedBadge('video', localVideo.current.id)
+        hideMutedBadge('video', localVideo.current.id);
       } else {
-        showMutedBadge('video', localVideo.current.id)
+        showMutedBadge('video', localVideo.current.id);
       }
-      onMediaToggle('video')
+      onMediaToggle('video');
     }
   }
 
   const disabled = useMemo(() => {
-      return !values.name || !values.roomName || !hasVideo
-    }, [values, hasVideo])
+    // one of two modes should be selected
+    const participantOrViewer = values.participant || values.viewer;
+    return !values.name || !values.roomName || !hasVideo || !participantOrViewer;
+  }, [values, hasVideo]);
 
-  const title = 'Create a Web3 Video Room'
+  const title = 'Create a Web3 Video Room';
 
   const onCreateMeeting = () => {
     navigate('/call', {
@@ -150,8 +153,8 @@ const Home = () => {
         participantPrice: values.participant ? utils.format.parseNearAmount(values.participantPrice) : '',
         title: values.roomName,
       }
-    })
-  }
+    });
+  };
 
   return (
     <>
@@ -284,7 +287,7 @@ const Home = () => {
 
       <Footer/>
     </>
-  )
-}
+  );
+};
 
-export default observer(Home)
+export default observer(Home);
