@@ -263,6 +263,13 @@ const Call = () => {
         }
         return newParticipants;
       });
+
+      setMediaState(prev => (
+        {
+          ...prev,
+          [participant.uid]: {audio: !participant.audioMuted, video: !participant.vieoMuted}
+        }
+      ));
       setLastRemote(Date.now());
     }
   };
