@@ -145,11 +145,7 @@ const Call = () => {
 
       await clientLocal.current.publish(media);
       if (useE2ee) {
-        e2ee.setKey(new TextEncoder().encode(localKey.current));
         clientLocal.current.transports[0].pc.getSenders().forEach(e2ee.setupSenderTransform);
-        clientLocal.current.transports[1].pc.addEventListener('track', (e) => {
-          e2ee.setupReceiverTransform(e.receiver);
-        });
       }
 
       streams.current[media.id] = media;
@@ -228,6 +224,13 @@ const Call = () => {
       _signalLocal.onopen = async () => {
         clientLocal.current.join(response.data.token, response.data.signature);
         sendState();
+
+        if (useE2ee) {
+          e2ee.setKey(new TextEncoder().encode(localKey.current));
+          clientLocal.current.transports[1].pc.addEventListener('track', (e) => {
+            e2ee.setupReceiverTransform(e.receiver);
+          });
+        }
 
         if (!noPublish) {
           void publish();
