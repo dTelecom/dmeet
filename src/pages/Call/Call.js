@@ -168,7 +168,7 @@ const Call = () => {
       setLoading(false)
     })
       .catch(console.error);
-  }, [audioEnabled, constraints.audio?.exact, constraints.video, defaultConstraints.video, name, sid, useE2ee, videoEnabled])
+  }, [audioEnabled, constraints.audio?.exact, constraints.video, defaultConstraints.video, useE2ee, videoEnabled])
 
   const start = useCallback(async () => {
     try {
@@ -180,7 +180,7 @@ const Call = () => {
         url = 'https://app.dmeet.org/api/room/join';
       } else {
         data.e2ee = useE2ee
-        data.title = `${name} room`
+        data.title = location.state?.title
         data.viewerPrice = location.state?.viewerPrice
         data.participantPrice = location.state?.participantPrice
       }

@@ -148,6 +148,7 @@ const Home = () => {
         ...values,
         viewerPrice: values.viewer ? utils.format.parseNearAmount(values.viewerPrice) : '',
         participantPrice: values.participant ? utils.format.parseNearAmount(values.participantPrice) : '',
+        title: values.roomName,
       }
     })
   }

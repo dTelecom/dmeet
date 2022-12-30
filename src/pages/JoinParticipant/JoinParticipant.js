@@ -25,7 +25,6 @@ const JoinParticipant = () => {
   const [devices, setDevices] = useState([])
   const location = useLocation()
   const [room] = useState(location.state?.room)
-  const [e2ee] = useState(false)
   const {
     constraints,
     onDeviceChange,
@@ -136,7 +135,7 @@ const JoinParticipant = () => {
         callState: constraintsState,
         audioEnabled,
         videoEnabled,
-        e2ee,
+        e2ee: room.e2ee,
       }
     })
   }
