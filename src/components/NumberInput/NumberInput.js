@@ -1,5 +1,5 @@
-import React, {useRef} from 'react'
-import styles from './NumberInput.module.scss'
+import React, {useRef} from 'react';
+import styles from './NumberInput.module.scss';
 import {Box} from '@chakra-ui/react';
 import CurrencyInput from 'react-currency-input-field';
 
@@ -34,10 +34,11 @@ const NumberInput = ({value, onChange, placeholder, icon, label, suffix, disable
           suffix={suffix}
           disableGroupSeparators
           disabled={disabled}
+          disableAbbreviations
         />
       </div>
     </Box>
-  )
-}
+  );
+};
 
-export default NumberInput
+export default NumberInput;

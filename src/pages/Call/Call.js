@@ -169,7 +169,8 @@ const Call = () => {
   const start = useCallback(async () => {
     try {
       let url = 'https://app.dmeet.org/api/room/create';
-      let data = {name};
+      let data = {name, nonce: localStorage.getItem('nonce')};
+
       if (sid !== undefined) {
         data.sid = sid;
         data.noPublish = noPublish;
@@ -179,6 +180,8 @@ const Call = () => {
         data.title = location.state?.title;
         data.viewerPrice = location.state?.viewerPrice;
         data.participantPrice = location.state?.participantPrice;
+        data.participantID = location.state?.participantID;
+        data.viewerID = location.state?.viewerID;
       }
       const response = await axios.post(url, data);
       const randomServer = response.data.url;
