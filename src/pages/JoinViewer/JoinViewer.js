@@ -35,7 +35,7 @@ export const JoinViewer = () => {
     chainId: polygon.id,
     args: [5],
     overrides: {
-      value: ethers.utils.parseEther(ethers.utils.parseEther(room.viewerPrice)), // ?
+      value: ethers.utils.parseEther(room.viewerPrice),
     },
   });
 
@@ -62,6 +62,7 @@ export const JoinViewer = () => {
   const onJoin = () => {
     // TODO: pay?
     if (paymentNeeded) {
+      console.log(buyMembership);
       buyMembership();
     } else {
       navigate('/call/' + sid, {state: {name, noPublish: true, e2ee: room.e2ee}});

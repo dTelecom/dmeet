@@ -35,6 +35,7 @@ const NumberInput = ({value, onChange, placeholder, icon, label, suffix, disable
           disableGroupSeparators
           disabled={disabled}
           disableAbbreviations
+          decimalsLimit={25}
         />
       </div>
     </Box>

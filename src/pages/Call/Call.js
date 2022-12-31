@@ -180,8 +180,8 @@ const Call = () => {
         data.title = location.state?.title;
         data.viewerPrice = location.state?.viewerPrice;
         data.participantPrice = location.state?.participantPrice;
-        data.participantID = location.state?.participantID;
-        data.viewerID = location.state?.viewerID;
+        data.participantID = location.state?.participantID === '0' ? '' : location.state?.participantID;
+        data.viewerID = location.state?.viewerID === '0' ? '' : location.state?.viewerID;
       }
       const response = await axios.post(url, data);
       const randomServer = response.data.url;
