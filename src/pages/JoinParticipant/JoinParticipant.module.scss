@@ -21,7 +21,6 @@
 	line-height: 17px;
 }
 
-
 .videoContainer {
 	border: 2px solid #252728;
 	border-radius: 10px;
@@ -125,6 +124,7 @@
 		margin: 0 auto;
 
 		@media (min-width: 900px) {
+			margin: 0;
 			height: 72px;
 		}
 	}

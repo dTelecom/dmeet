@@ -61,7 +61,8 @@ export const JoinViewer = () => {
   });
 
   const onJoin = () => {
-    // TODO: pay?
+    if (txBuyLoading) return;
+
     if (paymentNeeded) {
       console.log(buyMembership);
       buyMembership();

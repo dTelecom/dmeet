@@ -173,7 +173,8 @@ const JoinParticipant = () => {
   });
 
   const onJoin = () => {
-    // TODO: pay?
+    if (txBuyLoading) return;
+
     if (paymentNeeded) {
       buyMembership();
     } else {
