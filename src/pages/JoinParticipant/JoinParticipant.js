@@ -137,7 +137,7 @@ const JoinParticipant = () => {
     ...contractConfig,
     functionName: 'buyMembership',
     chainId: polygon.id,
-    args: [5],
+    args: [room.participantID],
     overrides: {
       value: room.participantPrice,
     },
