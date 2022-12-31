@@ -33,7 +33,7 @@ export const JoinViewer = () => {
     ...contractConfig,
     functionName: 'buyMembership',
     chainId: polygon.id,
-    args: [room.viewerID],
+    args: [room.ViewerID],
     overrides: {
       value: room.viewerPrice,
     },
