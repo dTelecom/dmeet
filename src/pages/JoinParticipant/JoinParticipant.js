@@ -139,7 +139,7 @@ const JoinParticipant = () => {
     chainId: polygon.id,
     args: [5],
     overrides: {
-      value: ethers.utils.parseEther(room.viewerPrice),
+      value: room.participantPrice,
     },
   });
 
