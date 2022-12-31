@@ -154,6 +154,7 @@ const JoinParticipant = () => {
   const {
     data: txBuyData,
     isSuccess: txBuySuccess,
+    isLoading: txBuyLoading,
     error: txBuyError,
   } = useWaitForTransaction({
     hash: buyData?.hash,
@@ -246,7 +247,7 @@ const JoinParticipant = () => {
             >
               <ButtonWithWalletConnect
                 onClick={onJoin}
-                text={paymentNeeded ? ethers.utils.formatEther(room.participantPrice) + ' MATIC' : 'Free'}
+                text={txBuyLoading ? 'Joining...' : paymentNeeded ? ethers.utils.formatEther(room.participantPrice) + ' MATIC' : 'Free'}
                 disabled={disabled}
                 needWallet={paymentNeeded}
               />

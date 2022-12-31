@@ -35,7 +35,7 @@ export const JoinViewer = () => {
     chainId: polygon.id,
     args: [5],
     overrides: {
-      value: ethers.utils.parseEther(room.viewerPrice),
+      value: room.viewerPrice,
     },
   });
 
@@ -50,6 +50,7 @@ export const JoinViewer = () => {
   const {
     data: txBuyData,
     isSuccess: txBuySuccess,
+    isLoading: txBuyLoading,
     error: txBuyError,
   } = useWaitForTransaction({
     hash: buyData?.hash,
@@ -120,7 +121,7 @@ export const JoinViewer = () => {
           <div className={styles.button}>
             <ButtonWithWalletConnect
               onClick={onJoin}
-              text={paymentNeeded ? ethers.utils.formatEther(room.viewerPrice) + ' MATIC' : 'Free'}
+              text={txBuyLoading ? 'Joining...' : paymentNeeded ? ethers.utils.formatEther(room.viewerPrice) + ' MATIC' : 'Free'}
               disabled={!name}
               needWallet={paymentNeeded}
             />
