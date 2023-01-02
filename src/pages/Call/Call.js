@@ -1,6 +1,6 @@
-import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {Header} from '../../components/Header/Header';
-import styles from './Call.module.scss'
+import styles from './Call.module.scss';
 import {useLocation, useNavigate, useParams} from 'react-router-dom';
 import {Container} from '../../components/Container/Container';
 import {Box, Flex} from '@chakra-ui/react';
@@ -16,7 +16,7 @@ import {useMediaConstraints} from '../../hooks/useMediaConstraints';
 import {IonSFUJSONRPCSignal} from 'js-sdk/lib/signal/json-rpc-impl';
 import {LocalStream} from 'js-sdk/lib/stream';
 import Client from 'js-sdk/lib/client';
-import * as e2ee from './e2ee'
+import * as e2ee from './e2ee';
 import axios from 'axios';
 import {CopyToClipboardButton} from '../../components/CopyToClipboardButton/CopyToClipboardButton';
 import {loadDevices} from '../../utils/loadDevices';
@@ -29,17 +29,17 @@ const config = {
 
 const Call = () => {
   const {isMobile} = useBreakpoints();
-  const navigate = useNavigate()
-  const [devices, setDevices] = useState([])
-  const {sid: urlSid} = useParams()
-  const location = useLocation()
-  const clientLocal = useRef()
-  const signalLocal = useRef()
-  const [sid] = useState(urlSid || undefined)
-  const [participants, setParticipants] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [inviteLink, setInviteLink] = useState('')
-  const [lastRemote, setLastRemote] = useState(0)
+  const navigate = useNavigate();
+  const [devices, setDevices] = useState([]);
+  const {sid: urlSid} = useParams();
+  const location = useLocation();
+  const clientLocal = useRef();
+  const signalLocal = useRef();
+  const [sid] = useState(urlSid || undefined);
+  const [participants, setParticipants] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [inviteLink, setInviteLink] = useState('');
+  const [lastRemote, setLastRemote] = useState(0);
   const {
     constraints,
     onDeviceChange,
@@ -50,80 +50,80 @@ const Call = () => {
     selectedVideoId,
     defaultConstraints
   } = useMediaConstraints(location.state?.callState, location.state?.audioEnabled, location.state?.videoEnabled);
-  const localMedia = useRef()
-  const streams = useRef({})
-  const [mediaState, setMediaState] = useState({})
-  const localUid = useRef()
-  const localKey = useRef()
+  const localMedia = useRef();
+  const streams = useRef({});
+  const [mediaState, setMediaState] = useState({});
+  const localUid = useRef();
+  const localKey = useRef();
 
-  const name = useMemo(() => location.state?.name || (Math.random() + 1).toString(36).substring(7), [location.state?.name])
-  const useE2ee = useMemo(() => Boolean(location.state?.e2ee), [location.state?.e2ee])
-  const noPublish = useMemo(() => Boolean(location.state?.noPublish), [location.state?.noPublish])
+  const name = useMemo(() => location.state?.name || (Math.random() + 1).toString(36).substring(7), [location.state?.name]);
+  const useE2ee = useMemo(() => Boolean(location.state?.e2ee), [location.state?.e2ee]);
+  const noPublish = useMemo(() => Boolean(location.state?.noPublish), [location.state?.noPublish]);
 
-  const started = useRef(false)
+  const started = useRef(false);
 
   const hangup = useCallback(() => {
     if (clientLocal.current) {
-      clientLocal.current.signal.call('end', {})
+      clientLocal.current.signal.call('end', {});
       clientLocal.current.close();
-      clientLocal.current = null
-      navigate('/')
+      clientLocal.current = null;
+      navigate('/');
     }
-  }, [navigate])
+  }, [navigate]);
 
   useEffect(() => {
-    void loadMedia()
+    void loadMedia();
 
     return () => {
-      hangup()
-    }
+      hangup();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, []);
 
   const sendState = useCallback(() => {
-    if (noPublish) return
+    if (noPublish) return;
 
     if (signalLocal.current?.socket.readyState === 1) {
-      console.log('[sendState]', 'audio enabled: ' + audioEnabled, 'video enabled: ' + videoEnabled)
+      console.log('[sendState]', 'audio enabled: ' + audioEnabled, 'video enabled: ' + videoEnabled);
 
       signalLocal.current.notify('muteEvent', {
         muted: !audioEnabled, kind: 'audio'
-      })
+      });
 
       signalLocal.current.notify('muteEvent', {
         muted: !videoEnabled, kind: 'video'
-      })
+      });
     }
-  }, [audioEnabled, noPublish, videoEnabled])
+  }, [audioEnabled, noPublish, videoEnabled]);
 
   useEffect(() => {
-    sendState()
+    sendState();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [audioEnabled, videoEnabled, lastRemote]);
 
   const onLeave = useCallback(({participant}) => {
-    console.log('[onLeave]', participant)
+    console.log('[onLeave]', participant);
     try {
       // remove participant
-      setParticipants(prev => prev.filter(p => p.uid !== participant.uid))
+      setParticipants(prev => prev.filter(p => p.uid !== participant.uid));
 
       // remove stream
       if (streams.current[participant.streamID]) {
-        delete streams.current[participant.streamID]
+        delete streams.current[participant.streamID];
       }
 
       // remove media state
       if (mediaState[participant.uid]) {
         setMediaState(prev => {
-          const newState = {...prev}
-          delete newState[participant.uid]
-          return newState
-        })
+          const newState = {...prev};
+          delete newState[participant.uid];
+          return newState;
+        });
       }
     } catch (err) {
-      console.error(err)
+      console.error(err);
     }
-  }, [mediaState])
+  }, [mediaState]);
 
   const publish = useCallback(async () => {
     LocalStream.getUserMedia({
@@ -133,50 +133,52 @@ const Call = () => {
       codec: 'vp8',
       sendEmptyOnMute: false,
     }).then(async (media) => {
-      void loadDevices(setDevices)
-      localMedia.current = media
+      void loadDevices(setDevices);
+      localMedia.current = media;
       if (constraints.audio?.exact) {
-        media.switchDevice('audio', constraints.audio?.exact)
+        media.switchDevice('audio', constraints.audio?.exact);
       }
 
       if (constraints.video?.exact) {
-        media.switchDevice('video', constraints.video.exact)
+        media.switchDevice('video', constraints.video.exact);
       }
 
-      await clientLocal.current.publish(media)
+      await clientLocal.current.publish(media);
       if (useE2ee) {
-        e2ee.setKey(new TextEncoder().encode(localKey.current))
         clientLocal.current.transports[0].pc.getSenders().forEach(e2ee.setupSenderTransform);
-        clientLocal.current.transports[1].pc.addEventListener('track', (e) => {
-          e2ee.setupReceiverTransform(e.receiver);
-        });
       }
 
-      streams.current[media.id] = media
+      streams.current[media.id] = media;
       setMediaState(prev => ({
         ...prev, [localUid.current]: {
           audio: audioEnabled, video: videoEnabled
         }
-      }))
+      }));
 
-      setLoading(false)
+      onJoin({
+        participant: {
+          uid: localUid.current, streamID: media.id, name, sid
+        }
+      });
+
+      setLoading(false);
     })
       .catch(console.error);
-  }, [audioEnabled, constraints.audio?.exact, constraints.video, defaultConstraints.video, useE2ee, videoEnabled])
+  }, [audioEnabled, constraints.audio?.exact, constraints.video, defaultConstraints.video, useE2ee, videoEnabled]);
 
   const start = useCallback(async () => {
     try {
       let url = 'https://app.dmeet.org/api/room/create';
       let data = {name};
       if (sid !== undefined) {
-        data.sid = sid
-        data.noPublish = noPublish
+        data.sid = sid;
+        data.noPublish = noPublish;
         url = 'https://app.dmeet.org/api/room/join';
       } else {
-        data.e2ee = useE2ee
-        data.title = location.state?.title
-        data.viewerPrice = location.state?.viewerPrice
-        data.participantPrice = location.state?.participantPrice
+        data.e2ee = useE2ee;
+        data.title = location.state?.title;
+        data.viewerPrice = location.state?.viewerPrice;
+        data.participantPrice = location.state?.participantPrice;
       }
       const response = await axios.post(url, data);
       const randomServer = response.data.url;
@@ -187,20 +189,20 @@ const Call = () => {
       console.log(`Created: `, response.data);
       console.log(`Join: `, parsedSID, localUid.current);
 
-      setInviteLink(window.location.origin + '/join/' + parsedSID)
+      setInviteLink(window.location.origin + '/join/' + parsedSID);
 
       const _signalLocal = new IonSFUJSONRPCSignal(randomServer);
-      signalLocal.current = _signalLocal
+      signalLocal.current = _signalLocal;
 
       if (useE2ee) {
-        config.encodedInsertableStreams = true
+        config.encodedInsertableStreams = true;
       }
 
-      const _clientLocal = new Client(_signalLocal, config)
-      clientLocal.current = _clientLocal
+      const _clientLocal = new Client(_signalLocal, config);
+      clientLocal.current = _clientLocal;
 
       _clientLocal.onerrnegotiate = () => {
-        hangup()
+        hangup();
       };
 
       _clientLocal.ontrack = (track, stream) => {
@@ -208,123 +210,150 @@ const Call = () => {
 
         // If the stream is not there in the streams map.
         if (!streams.current[stream.id]) {
-          streams.current[stream.id] = stream
+          streams.current[stream.id] = stream;
           setMediaState(prev => ({
             ...prev
-          }))
+          }));
         }
 
         stream.onremovetrack = () => {
-          console.log('[onremovetrack]', stream.id)
+          console.log('[onremovetrack]', stream.id);
         };
       };
 
       _signalLocal.onopen = async () => {
         clientLocal.current.join(response.data.token, response.data.signature);
-        sendState()
+        sendState();
+
+        if (useE2ee) {
+          e2ee.setKey(new TextEncoder().encode(localKey.current));
+          clientLocal.current.transports[1].pc.addEventListener('track', (e) => {
+            e2ee.setupReceiverTransform(e.receiver);
+          });
+        }
 
         if (!noPublish) {
-          void publish()
+          void publish();
         } else {
-          setLoading(false)
+          setLoading(false);
         }
-      }
+      };
       _signalLocal.on_notify('onJoin', onJoin);
       _signalLocal.on_notify('onLeave', onLeave);
       _signalLocal.on_notify('onStream', onStream);
-      _signalLocal.on_notify('participants', onParticipantsEvent)
+      _signalLocal.on_notify('participants', onParticipantsEvent);
       _signalLocal.on_notify('muteEvent', onMuteEvent);
     } catch (errors) {
       console.error(errors);
     }
-  }, [name, sid, useE2ee, onLeave, noPublish, location.state, hangup, sendState, publish])
+  }, [name, sid, useE2ee, onLeave, noPublish, location.state, hangup, sendState, publish]);
 
   const loadMedia = useCallback(async () => {
     // HACK: dev use effect fires twice
-    if (started.current === true) return
-    started.current = true
+    if (started.current === true) return;
+    started.current = true;
 
-    await start()
-  }, [start])
+    await start();
+  }, [start]);
 
   const onJoin = ({participant}) => {
-    console.log('[onJoin]', participant)
+    console.log('[onJoin]', participant);
     if (participant.uid !== localUid.current) {
       setParticipants(prev => {
         const newParticipants = [...prev];
         if (!newParticipants.some(p => p.uid === participant.uid)) {
-          return [...prev, participant]
+          return [...prev, participant];
         }
-        return newParticipants
-      })
-      setLastRemote(Date.now())
+        return newParticipants;
+      });
+
+      setMediaState(prev => (
+        {
+          ...prev,
+          [participant.uid]: {audio: !participant.audioMuted, video: !participant.vieoMuted}
+        }
+      ));
+      setLastRemote(Date.now());
     }
-  }
+  };
 
   const onParticipantsEvent = (participants) => {
-    console.log('[onParticipantsEvent]', participants)
-    if (!participants) return
-    setParticipants(Object.values(participants))
-    setLastRemote(Date.now())
-  }
+    console.log('[onParticipantsEvent]', participants);
+    if (!participants) return;
+    setParticipants(Object.values(participants));
 
+    // update media state from participants
+    const participantsMediaState = {};
+    Object.values(participants).forEach(participant => {
+      participantsMediaState[participant.uid] = {audio: !participant.audioMuted, video: !participant.videoMuted};
+    });
+    setMediaState(prev => ({
+      ...prev,
+      ...participantsMediaState,
+    }));
+
+    setLastRemote(Date.now());
+  };
+  console.log(mediaState);
   const onStream = ({participant}) => {
-    console.log('[onStream]', participant)
+    console.log('[onStream]', participant);
 
     setParticipants(prev => {
       if (!prev.some(p => p.uid === participant.uid)) {
-        return [...prev, participant]
+        return [...prev, participant];
       }
 
       return [...prev].map(p => {
         if (p.uid === participant.uid) {
-          return {...p, streamID: participant.streamID}
+          return {...p, streamID: participant.streamID};
         }
 
-        return p
+        return p;
       });
-    })
+    });
 
     if (participant.uid !== localUid.current) {
-      setLastRemote(Date.now())
+      setLastRemote(Date.now());
     }
-  }
+  };
 
   const onMuteEvent = ({participant, payload}) => {
-    console.log('[onMuteEvent]', participant, payload)
+    console.log('[onMuteEvent]', participant, payload);
 
     setMediaState(prev => {
-      let state = {audio: false, video: false}
+      let state = {audio: false, video: false};
       if (prev[participant.uid]) {
-        state = prev[participant.uid]
+        state = prev[participant.uid];
       }
 
-      state[payload.kind] = !payload.muted
+      state[payload.kind] = !payload.muted;
 
       return {
         ...prev, [participant.uid]: state
-      }
-    })
-  }
+      };
+    });
+  };
 
   const onDeviceSelect = useCallback((type, deviceId) => {
-    if (!localMedia.current) return
+    if (!localMedia.current) return;
 
-    localMedia.current.switchDevice(type, deviceId)
-    onDeviceChange(type, deviceId)
-  }, [onDeviceChange])
+    localMedia.current.switchDevice(type, deviceId);
+    onDeviceChange(type, deviceId);
+  }, [onDeviceChange]);
 
   const toggleMedia = useCallback((type) => {
     if (!!constraints[type]) {
-      localMedia.current.mute(type)
+      localMedia.current.mute(type);
     } else {
-      localMedia.current.unmute(type)
+      localMedia.current.unmute(type);
     }
-    onMediaToggle(type)
+    onMediaToggle(type);
     setMediaState(prev => ({
       ...prev, [localUid.current]: {...prev[localUid.current], [type]: !prev[localUid.current][type]}
-    }))
-  }, [constraints, onMediaToggle])
+    }));
+  }, [constraints, onMediaToggle]);
+
+  const participantsList = useMemo(() => participants.filter((p) => p.noPublish !== true), [participants]);
 
   return (<Box
     className={styles.container}
@@ -349,13 +378,13 @@ const Call = () => {
         flexDirection={'row'}
         flexWrap={'wrap'}
         gap={'8px'}
-        overflowY={participants.length === 1 ? 'initial' : 'auto'}
+        overflowY={participantsList.length === 1 ? 'initial' : 'auto'}
         justifyContent={'space-between'}
       >
-        {participants?.map((participant, index) => (<Box
+        {participantsList?.map((participant, index) => (<Box
           key={participant.streamID}
-          maxHeight={participants.length === 1 ? 'auto' : 'calc((100vh - 72px - 48px - 88px) / 2)'}
-          width={participants.length === 1 ? '100%' : 'calc(50% - 8px)'}
+          maxHeight={participantsList.length === 1 ? 'auto' : 'calc((100vh - 72px - 48px - 88px) / 2)'}
+          width={participantsList.length === 1 ? '100%' : 'calc(50% - 8px)'}
           style={{
             aspectRatio: 480 / 640
           }}
@@ -372,7 +401,7 @@ const Call = () => {
         className={classNames(styles.videoContainer)}
         boxAspectRatio={656 / 496}
       >
-        {participants?.map((participant, index) => (<Video
+        {participantsList?.map((participant, index) => (<Video
           key={participant.streamID + index}
           participant={participant}
           stream={streams.current[participant.streamID]}
@@ -393,7 +422,7 @@ const Call = () => {
           selectedVideoId={selectedVideoId}
           toggleAudio={() => toggleMedia('audio')}
           toggleVideo={() => toggleMedia('video')}
-          participantsCount={participants.length}
+          participantsCount={participantsList.length}
           noPublish={noPublish}
           isCall
         />
@@ -401,7 +430,7 @@ const Call = () => {
 
     </Container>
     <Footer/>
-  </Box>)
-}
+  </Box>);
+};
 
-export default Call
+export default Call;

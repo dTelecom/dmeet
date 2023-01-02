@@ -32,6 +32,7 @@ export const CustomCheckbox = ({label, checked, setChecked, ...checkboxProps}: I
 
   return (
     <Checkbox
+      defaultChecked={checked}
       onChange={handleCheckboxChange}
       icon={<CustomIcon/>}
       spacing={0}
