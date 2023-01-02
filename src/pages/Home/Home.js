@@ -1,6 +1,5 @@
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {Header} from '../../components/Header/Header';
-import {Button} from '../../components/Button/Button';
 import styles from './Home.module.scss';
 import {observer} from 'mobx-react';
 import {useNavigate} from 'react-router-dom';
@@ -16,19 +15,25 @@ import {CustomCheckbox} from '../../components/Checkbox/CustomCheckbox';
 import {loadDevices} from '../../utils/loadDevices';
 import {FaceIcon, KeyIcon} from '../../assets';
 import {useBreakpoints} from '../../hooks/useBreakpoints';
-import {utils} from 'near-api-js';
+import {ButtonWithWalletConnect} from '../../components/ButtonWithWalletConnect/ButtonWithWalletConnect';
+import {useContractWrite, usePrepareContractWrite, useWaitForTransaction} from 'wagmi';
+import {contractConfig} from '../../const/contractConfig';
+import {polygon} from 'wagmi/chains';
+import {ethers} from 'ethers';
+import DmeetContract from '../../const/DmeetContract.json';
 
 const Home = () => {
+  const DmeetInterface = new ethers.utils.Interface(DmeetContract.abi);
   const {isMobile} = useBreakpoints();
   const navigate = useNavigate();
   const [hasVideo, setHasVideo] = useState(false);
   const [devices, setDevices] = useState([]);
   const [values, setValues] = useState({
     viewer: true,
-    viewerPrice: 0,
+    viewerPrice: '0',
     e2ee: true,
     participant: true,
-    participantPrice: 0,
+    participantPrice: '0',
     roomName: '',
     name: '',
   });
@@ -142,18 +147,77 @@ const Home = () => {
 
   const title = 'Create a Web3 Video Room';
 
-  const onCreateMeeting = () => {
-    navigate('/call', {
-      state: {
-        callState: constraintsState,
-        audioEnabled,
-        videoEnabled,
-        ...values,
-        viewerPrice: values.viewer ? utils.format.parseNearAmount(values.viewerPrice) : '',
-        participantPrice: values.participant ? utils.format.parseNearAmount(values.participantPrice) : '',
-        title: values.roomName,
-      }
-    });
+  const requiresWallet = useMemo(() => {
+    return values.participantPrice > 0 || values.viewerPrice > 0;
+  }, [values]);
+
+  const [etherViewerPrice, etherParticipantPrice] = useMemo(() => {
+    return [ethers.utils.parseEther(String(values.viewerPrice)), ethers.utils.parseEther(String(values.participantPrice))];
+  }, [values]);
+
+  const {config: contractWriteConfig} = usePrepareContractWrite({
+    ...contractConfig,
+    functionName: 'createMembership',
+    chainId: polygon.id,
+    args: [etherViewerPrice, etherParticipantPrice],
+  });
+
+  const {
+    data: createData,
+    write: createMembership,
+    isLoading: isCreateLoading,
+    isSuccess: isCreateStarted,
+    error: createError,
+  } = useContractWrite(contractWriteConfig);
+
+  const getCallState = () => {
+    return {
+      callState: constraintsState,
+      audioEnabled,
+      videoEnabled,
+      ...values,
+      viewerPrice: values.viewer ? ethers.utils.parseEther(String(values.viewerPrice)).toString() : '',
+      participantPrice: values.participant ? ethers.utils.parseEther(String((values.participantPrice))).toString() : '',
+      title: values.roomName,
+    }
+  }
+
+  const {
+    data: txData,
+    isSuccess: txSuccess,
+    error: txError,
+  } = useWaitForTransaction({
+    hash: createData?.hash,
+    onSuccess(data) {
+      data.logs.map(log => {
+        try {
+          const parsed = DmeetInterface.parseLog(log);
+          navigate('/call', {
+            state: {
+              ...getCallState(),
+              viewerID: parsed.args.viewer.toString(),
+              participantID: parsed.args.participant.toString(),
+            }
+          });
+        } catch (e) {
+          console.error(e);
+        }
+      });
+    }
+  });
+
+  const onCreateMeeting = async () => {
+    if (isCreateLoading || isCreateStarted) {
+      return;
+    }
+
+    if (requiresWallet) {
+      createMembership?.();
+    } else {
+      navigate('/call', {
+        state: getCallState()
+      });
+    }
   };
 
   return (
@@ -230,7 +294,7 @@ const Home = () => {
                   <NumberInput
                     value={values.viewerPrice}
                     onChange={(value) => onChange('viewerPrice', value)}
-                    suffix=" NEAR"
+                    suffix=" MATIC"
                     disabled={!values.viewer}
                   />
                 </Flex>
@@ -250,7 +314,7 @@ const Home = () => {
                   <NumberInput
                     value={values.participantPrice}
                     onChange={(value) => onChange('participantPrice', value)}
-                    suffix=" NEAR"
+                    suffix=" MATIC"
                     disabled={!values.participant}
                   />
                 </Flex>
@@ -273,10 +337,11 @@ const Home = () => {
                 boxSizing={'border-box'}
                 className={styles.buttonContainer}
               >
-                <Button
+                <ButtonWithWalletConnect
                   onClick={onCreateMeeting}
-                  text={'Create a Video Room'}
+                  text={isCreateLoading || isCreateStarted ? 'Creating...' : 'Create a Video Room'}
                   disabled={disabled}
+                  needWallet={requiresWallet}
                 />
               </Box>
 

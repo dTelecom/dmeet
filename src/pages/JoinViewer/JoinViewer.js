@@ -8,27 +8,68 @@ import Footer from '../../components/Footer/Footer';
 import {Container} from '../../components/Container/Container';
 import Input from '../../components/Input/Input';
 import {FaceIcon} from '../../assets';
-import {Button} from '../../components/Button/Button';
-import {utils} from 'near-api-js';
 import {useBreakpoints} from '../../hooks/useBreakpoints';
+import {ethers} from 'ethers';
+import {ButtonWithWalletConnect} from '../../components/ButtonWithWalletConnect/ButtonWithWalletConnect';
+import {contractConfig} from '../../const/contractConfig';
+import {polygon} from 'wagmi/chains';
+import {useContractWrite, usePrepareContractWrite, useWaitForTransaction} from 'wagmi';
 
 export const JoinViewer = () => {
-  const {isMobile} = useBreakpoints()
-  const navigate = useNavigate()
-  const location = useLocation()
-  const {sid} = useParams()
-  const [room] = useState(location.state?.room)
-  const [name, setName] = useState('')
+  const {isMobile} = useBreakpoints();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const {sid} = useParams();
+  const [room] = useState(location.state?.room);
+  const [name, setName] = useState('');
 
   if (!room) {
-    navigate('/')
-    return null
+    navigate('/');
   }
 
+  const paymentNeeded = room.viewerPrice !== '0';
+
+  const {config: contractBuyWriteConfig} = usePrepareContractWrite({
+    ...contractConfig,
+    functionName: 'buyMembership',
+    chainId: polygon.id,
+    args: [room.ViewerID],
+    overrides: {
+      value: room.viewerPrice,
+    },
+  });
+
+  const {
+    data: buyData,
+    write: buyMembership,
+    isLoading: isBuyLoading,
+    isSuccess: isBuyStarted,
+    error: buyError,
+  } = useContractWrite(contractBuyWriteConfig);
+
+  const {
+    data: txBuyData,
+    isSuccess: txBuySuccess,
+    isLoading: txBuyLoading,
+    error: txBuyError,
+  } = useWaitForTransaction({
+    hash: buyData?.hash,
+    onSuccess(data) {
+      console.log(data);
+      navigate('/call/' + sid, {state: {name, noPublish: true, e2ee: room.e2ee}});
+    },
+  });
+
   const onJoin = () => {
-    // TODO: pay?
-    navigate('/call/' + sid, {state: {name, noPublish: true, e2ee: room.e2ee}});
-  }
+    if (txBuyLoading) return;
+
+    if (paymentNeeded) {
+      console.log(buyMembership);
+      buyMembership();
+    } else {
+      navigate('/call/' + sid, {state: {name, noPublish: true, e2ee: room.e2ee}});
+    }
+  };
 
   return (
     <>
@@ -79,10 +120,11 @@ export const JoinViewer = () => {
           </Flex>
 
           <div className={styles.button}>
-            <Button
-              text={room.viewerPrice !== '' ? utils.format.formatNearAmount(room.viewerPrice) + ' NEAR' : 'Free'}
+            <ButtonWithWalletConnect
               onClick={onJoin}
+              text={txBuyLoading ? 'Joining...' : paymentNeeded ? ethers.utils.formatEther(room.viewerPrice) + ' MATIC' : 'Free'}
               disabled={!name}
+              needWallet={paymentNeeded}
             />
           </div>
 
@@ -95,5 +137,5 @@ export const JoinViewer = () => {
 
       <Footer/>
     </>
-  )
-}
+  );
+};
