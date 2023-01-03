@@ -7,6 +7,9 @@ import {JoinModeSelect} from "./pages/JoinModeSelect/JoinModeSelect";
 import Join from "./pages/JoinParticipant/JoinParticipant";
 import {JoinViewer} from "./pages/JoinViewer/JoinViewer";
 import './App.scss';
+import { Buffer } from 'buffer';
+
+window.Buffer = window.Buffer || Buffer;
 
 const App = () => {
   return (
