@@ -37,7 +37,6 @@ export function RainbowKitAuthProvider(
         getNonce: async () => {
           const response = await fetch("https://app.dmeet.org/api/siwe/nonce");
           const nonce = await response.text();
-          localStorage.setItem('nonce', nonce);
           return nonce
         },
 
@@ -76,6 +75,7 @@ export function RainbowKitAuthProvider(
           });
 
           if (verifyRes?.ok) {
+            localStorage.setItem('nonce', message.nonce);
             setSessionStatus("authenticated");
           } else {
             setSessionStatus("unauthenticated");
@@ -85,7 +85,7 @@ export function RainbowKitAuthProvider(
         },
 
         signOut: async () => {
-          console.log("signOut")
+          localStorage.removeItem('nonce');
         },
       }),
     []

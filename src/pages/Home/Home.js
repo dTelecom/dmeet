@@ -192,6 +192,7 @@ const Home = () => {
       data.logs.map(log => {
         try {
           const parsed = DmeetInterface.parseLog(log);
+          console.error(parsed);
           navigate('/call', {
             state: {
               ...getCallState(),

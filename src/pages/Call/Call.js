@@ -164,7 +164,13 @@ const Call = () => {
       setLoading(false);
     })
       .catch(console.error);
-  }, [audioEnabled, constraints.audio?.exact, constraints.video, defaultConstraints.video, useE2ee, videoEnabled]);
+  }, [audioEnabled, constraints.audio?.exact, constraints.video, defaultConstraints.video, useE2ee, videoEnabled, name, sid]);
+
+  const delay = (ms) => {
+      return new Promise(resolve => {
+          setTimeout(() => { resolve('') }, ms);
+      })
+  }
 
   const start = useCallback(async () => {
     try {
@@ -183,6 +189,19 @@ const Call = () => {
         data.participantID = location.state?.participantID === '0' ? '' : location.state?.participantID;
         data.viewerID = location.state?.viewerID === '0' ? '' : location.state?.viewerID;
       }
+
+      if (location.state?.participantID !== '0' || location.state?.viewerID !== '0') {
+        for (let i = 0; i < 10; ++i) {
+            await delay(1000);
+            try {
+              const verifyRes = await axios.post(url+"/verify", data);
+              if (verifyRes.status === 200) {
+                break
+              }
+            } catch {}
+        }
+      }
+
       const response = await axios.post(url, data);
       const randomServer = response.data.url;
       const parsedSID = response.data.sid;

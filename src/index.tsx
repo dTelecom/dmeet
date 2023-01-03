@@ -37,10 +37,13 @@ const wagmiClient = createClient({
   provider,
   webSocketProvider,
 });
+
+const auth_status = localStorage.getItem('nonce') === null ? "unauthenticated" : "authenticated"
+
 root.render(
   // <React.StrictMode>
   <WagmiConfig client={wagmiClient}>
-    <RainbowKitAuthProvider status={"unauthenticated"}>
+    <RainbowKitAuthProvider status={auth_status}>
       <RainbowKitProvider chains={chains}>
         <BrowserRouter>
           <App/>

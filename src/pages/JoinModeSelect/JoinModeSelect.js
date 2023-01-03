@@ -33,6 +33,17 @@ export const JoinModeSelect = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  useEffect(() => {
+    if (room) {
+      if (room.viewerPrice === "") {
+        navigate(`/join/participant/${sid}`, {state: {room}})
+      }
+      if (room.participantPrice === "") {
+        navigate(`/join/viewer/${sid}`, {state: {room}})
+      }
+    }
+  }, [room])
+
   if (!room) return null
 
   return (
