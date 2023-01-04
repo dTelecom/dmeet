@@ -40,6 +40,7 @@ const Call = () => {
   const [loading, setLoading] = useState(true);
   const [inviteLink, setInviteLink] = useState('');
   const [lastRemote, setLastRemote] = useState(0);
+  const [participantsCount, setParticipantsCount] = useState(0);
   const {
     constraints,
     onDeviceChange,
@@ -265,6 +266,7 @@ const Call = () => {
       _signalLocal.on_notify('onStream', onStream);
       _signalLocal.on_notify('participants', onParticipantsEvent);
       _signalLocal.on_notify('muteEvent', onMuteEvent);
+      _signalLocal.on_notify('participantsCount', onParticipantsCount);
     } catch (errors) {
       console.error(errors);
     }
@@ -356,6 +358,11 @@ const Call = () => {
     });
   };
 
+  const onParticipantsCount = (data) => {
+    console.log('[onParticipantsCount]', data);
+    setParticipantsCount(data.payload.participantsCount+data.payload.viewersCount)
+  };
+
   const onDeviceSelect = useCallback((type, deviceId) => {
     if (!localMedia.current) return;
 
@@ -385,7 +392,7 @@ const Call = () => {
         className={styles.headerControls}
         gap={'16px'}
       >
-        <ParticipantsBadge count={participants?.length}/>
+        <ParticipantsBadge count={participantsCount}/>
         <CopyToClipboardButton text={inviteLink}/>
       </Flex>
     </Header>
