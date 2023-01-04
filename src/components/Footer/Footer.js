@@ -7,7 +7,7 @@ const Footer = () => {
   return (
     <Flex className={styles.container}
           justifyContent={'center'}>
-      <p className={styles.text}>Powered by</p><img  src={dTelecomLogo}/>
+      <p className={styles.text}>Powered by</p><a href="https://dtelecom.org/" rel="noreferrer" target="_blank"><img src={dTelecomLogo}/></a>
     </Flex>
   )
 }

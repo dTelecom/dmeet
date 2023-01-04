@@ -96,11 +96,12 @@ export const JoinModeSelect = () => {
               onClick={() => navigate(`/join/participant/${sid}`, {state: {room}})}
             />
           </Flex>
-
-          <p className={styles.smallGreyText}>
-            End-to-end encryption is enabled,<br/>
-            we recommend using the Google Chrome browser.
-          </p>
+          {room.e2ee && (
+            <p className={styles.smallGreyText}>
+              End-to-end encryption is enabled,<br/>
+              we recommend using the Google Chrome browser.
+            </p>
+          )}
         </Flex>
       </Container>
 
