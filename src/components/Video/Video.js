@@ -12,6 +12,8 @@ const Video = ({participant, stream, isCurrentUser, mediaState}) => {
   useEffect(() => {
     if (videoElement.current && stream && !videoElement.current.srcObject) {
       videoElement.current.srcObject = stream
+      // viewer mode safari not working autoplay without get user media
+      videoElement.current.play();
     }
   })
 
