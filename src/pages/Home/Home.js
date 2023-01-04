@@ -148,11 +148,28 @@ const Home = () => {
   const title = 'Create a Web3 Video Room';
 
   const requiresWallet = useMemo(() => {
-    return values.participantPrice > 0 || values.viewerPrice > 0;
+    if (values.viewer && values.viewerPrice > 0) {
+      return true;
+    }
+    if (values.participant && values.participantPrice > 0) {
+      return true;
+    }
+
+    return false;
   }, [values]);
 
   const [etherViewerPrice, etherParticipantPrice] = useMemo(() => {
-    return [ethers.utils.parseEther(String(values.viewerPrice)), ethers.utils.parseEther(String(values.participantPrice))];
+    let etherViewerPrice = "0"
+    let etherParticipantPrice = "0"
+
+    try {
+      etherViewerPrice = ethers.utils.parseEther(String(values.viewerPrice))
+    } catch {}
+    try {
+      etherParticipantPrice = ethers.utils.parseEther(String(values.participantPrice))
+    } catch {}
+
+    return [etherViewerPrice, etherParticipantPrice];
   }, [values]);
 
   const {config: contractWriteConfig} = usePrepareContractWrite({
