@@ -19,11 +19,13 @@ import {useContractWrite, usePrepareContractWrite, useWaitForTransaction} from '
 import {contractConfig} from '../../const/contractConfig';
 import {polygon} from 'wagmi/chains';
 import {ButtonWithWalletConnect} from '../../components/ButtonWithWalletConnect/ButtonWithWalletConnect';
+import axios from 'axios';
 
 const JoinParticipant = () => {
   const navigate = useNavigate();
   const {isMobile} = useBreakpoints();
   const [name, setName] = useState('');
+  const [paymentNeeded, setPaymentNeeded] = useState(false);
   const [hasVideo, setHasVideo] = useState(false);
   const [devices, setDevices] = useState([]);
   const location = useLocation();
@@ -44,6 +46,7 @@ const JoinParticipant = () => {
 
   useEffect(() => {
     void loadMedia(constraints);
+    void checkPayment();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -130,8 +133,26 @@ const JoinParticipant = () => {
 
   const title = `${room?.hostName}\ninvites you`;
 
+  const checkPayment = useCallback(async () => {
+    let need = room.participantPrice !== '0';
 
-  const paymentNeeded = room.participantPrice !== '0';
+    if (need) {
+      let url = 'https://app.dmeet.org/api/room/join/verify';
+      let data = {
+        nonce: localStorage.getItem('nonce'),
+        sid: sid,
+        noPublish: false,
+      };
+
+      try {
+        const verifyRes = await axios.post(url, data);
+        if (verifyRes.status === 200) {
+          need = false;
+        }
+      } catch {}
+    }
+    setPaymentNeeded(need)
+  })
 
   const {config: contractBuyWriteConfig} = usePrepareContractWrite({
     ...contractConfig,
