@@ -281,10 +281,12 @@ const JoinParticipant = () => {
               flexDirection="column"
               gap={8}
             >
-              <p className={styles.text}>
-                {'End-to-end encryption is enabled,\n' +
-                  'we recommend using the Google Chrome browser.'}
-              </p>
+              {room.e2ee && (
+                <p className={styles.text}>
+                  {'End-to-end encryption is enabled,\n' +
+                    'we recommend using the Google Chrome browser.'}
+                </p>
+              )}
             </Flex>
           </Flex>
         </Flex>

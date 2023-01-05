@@ -153,11 +153,12 @@ export const JoinViewer = () => {
               needWallet={paymentNeeded}
             />
           </div>
-
-          <p className={styles.smallGreyText}>
-            End-to-end encryption is enabled,<br/>
-            we recommend using the Google Chrome browser.
-          </p>
+          {room.e2ee && (
+            <p className={styles.smallGreyText}>
+              End-to-end encryption is enabled,<br/>
+              we recommend using the Google Chrome browser.
+            </p>
+          )}
         </Flex>
       </Container>
 
