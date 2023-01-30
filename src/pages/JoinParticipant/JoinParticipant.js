@@ -188,6 +188,7 @@ const JoinParticipant = () => {
           audioEnabled,
           videoEnabled,
           e2ee: room.e2ee,
+          title: room.title,
         }
       });
     },
@@ -206,6 +207,7 @@ const JoinParticipant = () => {
           audioEnabled,
           videoEnabled,
           e2ee: room.e2ee,
+          title: room.title,
         }
       });
     }
@@ -214,7 +216,7 @@ const JoinParticipant = () => {
   return (
     <>
       <Header
-        title={room?.name}
+        title={room?.title}
         centered
       >
         <Flex

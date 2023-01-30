@@ -318,7 +318,7 @@ const Call = () => {
 
     setLastRemote(Date.now());
   };
-  console.log(mediaState);
+
   const onStream = ({participant}) => {
     console.log('[onStream]', participant);
 
@@ -387,7 +387,7 @@ const Call = () => {
   return (<Box
     className={styles.container}
   >
-    <Header>
+    <Header title={location.state?.title}>
       <Flex
         className={styles.headerControls}
         gap={'16px'}

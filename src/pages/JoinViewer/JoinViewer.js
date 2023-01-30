@@ -82,7 +82,12 @@ export const JoinViewer = () => {
     hash: buyData?.hash,
     onSuccess(data) {
       console.log(data);
-      navigate('/call/' + sid, {state: {name, noPublish: true, e2ee: room.e2ee}});
+      navigate('/call/' + sid, {
+        state: {
+          name, noPublish: true, e2ee: room.e2ee,
+          title: room.title,
+        }
+      });
     },
   });
 
@@ -93,7 +98,12 @@ export const JoinViewer = () => {
       console.log(buyMembership);
       buyMembership();
     } else {
-      navigate('/call/' + sid, {state: {name, noPublish: true, e2ee: room.e2ee}});
+      navigate('/call/' + sid, {
+        state: {
+          name, noPublish: true, e2ee: room.e2ee,
+          title: room.title,
+        }
+      });
     }
   };
 
