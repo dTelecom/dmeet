@@ -159,15 +159,17 @@ const Home = () => {
   }, [values]);
 
   const [etherViewerPrice, etherParticipantPrice] = useMemo(() => {
-    let etherViewerPrice = "0"
-    let etherParticipantPrice = "0"
+    let etherViewerPrice = '0';
+    let etherParticipantPrice = '0';
 
     try {
-      etherViewerPrice = ethers.utils.parseEther(String(values.viewerPrice))
-    } catch {}
+      etherViewerPrice = ethers.utils.parseEther(String(values.viewerPrice));
+    } catch {
+    }
     try {
-      etherParticipantPrice = ethers.utils.parseEther(String(values.participantPrice))
-    } catch {}
+      etherParticipantPrice = ethers.utils.parseEther(String(values.participantPrice));
+    } catch {
+    }
 
     return [etherViewerPrice, etherParticipantPrice];
   }, [values]);
@@ -184,7 +186,7 @@ const Home = () => {
     write: createMembership,
     isLoading: isCreateLoading,
     isSuccess: isCreateStarted,
-    error: createError,
+    // error: createError,
   } = useContractWrite(contractWriteConfig);
 
   const getCallState = () => {
@@ -196,17 +198,19 @@ const Home = () => {
       viewerPrice: values.viewer ? ethers.utils.parseEther(String(values.viewerPrice)).toString() : '',
       participantPrice: values.participant ? ethers.utils.parseEther(String((values.participantPrice))).toString() : '',
       title: values.roomName,
-    }
-  }
+    };
+  };
 
+  // eslint-disable-next-line no-empty-pattern
   const {
-    data: txData,
-    isSuccess: txSuccess,
-    error: txError,
+    // data: txData,
+    // isSuccess: txSuccess,
+    // error: txError,
   } = useWaitForTransaction({
     hash: createData?.hash,
     onSuccess(data) {
-      data.logs.map(log => {
+      // eslint-disable-next-line array-callback-return
+      data.logs.map((log) => {
         try {
           const parsed = DmeetInterface.parseLog(log);
           console.error(parsed);

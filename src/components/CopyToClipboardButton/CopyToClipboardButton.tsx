@@ -1,15 +1,17 @@
-import styles from "../../pages/Call/Call.module.scss";
-import React, {useEffect, useRef, useState} from "react";
-import {ChainIcon, WhiteTickIcon} from '../../assets';
-import CopyToClipboard from 'react-copy-to-clipboard';
+import styles from "../../pages/Call/Call.module.scss"
+import React, {useEffect, useRef, useState} from "react"
+import {ChainGreenIcon, ChainIcon, WhiteTickIcon} from '../../assets'
+import CopyToClipboard from 'react-copy-to-clipboard'
+import {useBreakpoints} from "../../hooks/useBreakpoints"
 
 interface IProps {
   text: string
 }
 
-export const CopyToClipboardButton = ({text}:IProps) => {
+export const CopyToClipboardButton = ({text}: IProps) => {
   const timer = useRef<NodeJS.Timeout>()
   const [copied, setCopied] = useState(false)
+  const {isMobile} = useBreakpoints()
 
   useEffect(() => {
     return () => {
@@ -21,7 +23,7 @@ export const CopyToClipboardButton = ({text}:IProps) => {
     if (timer.current) {
       clearTimeout(timer.current)
     }
-    setCopied(true);
+    setCopied(true)
     timer.current = setTimeout(() => setCopied(false), 2000)
   }
 
@@ -30,13 +32,22 @@ export const CopyToClipboardButton = ({text}:IProps) => {
       onCopy={onCopy}
       text={text}
     >
-      <button className={styles.inviteButton}>
-        <img
-          src={copied ? WhiteTickIcon : ChainIcon}
-          alt={'copy icon'}
-        />
-        {copied ? 'Copied!' : 'Copy invite link'}
-      </button>
+      {isMobile ? (
+        <button className={styles.inviteButtonMobile}>
+          <img
+            src={copied ? WhiteTickIcon : ChainGreenIcon}
+            alt={'copy icon'}
+          />
+        </button>
+      ) : (
+        <button className={styles.inviteButton}>
+          <img
+            src={copied ? WhiteTickIcon : ChainIcon}
+            alt={'copy icon'}
+          />
+          {copied ? 'Copied!' : 'Copy invite link'}
+        </button>
+      )}
     </CopyToClipboard>
   )
 }

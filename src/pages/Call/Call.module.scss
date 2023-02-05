@@ -34,12 +34,22 @@
 		padding: 0 16px;
 		width: 161px;
 	}
+
+	.inviteButtonMobile {
+		width: 40px;
+		height: 40px;
+		background: #252728;
+		border-radius: 40px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
 }
 
 .callContainer {
 	flex: 1;
 
-	@media (max-width: 900px) {
+	@media (max-width: 899px) {
 		height: calc(100% - 72px - 48px);
 	}
 
@@ -50,6 +60,10 @@
 
 .callContentContainer {
 	position: relative;
+	@media (max-width: 899px) {
+		display: flex;
+		flex-direction: column;
+	}
 }
 
 .videoContainer {
@@ -68,8 +82,10 @@
 	video {
 		position: absolute;
 		inset: 0;
+		object-fit: cover;
 
 		@media (min-width: 900px) {
+			object-fit: initial;
 			position: relative;
 		}
 		z-index: 1;
@@ -147,10 +163,7 @@
 
 .videoControls {
 	@media (max-width: 899px) {
-		position: absolute;
-		bottom: 0;
-		left: 0;
-		right: 0;
+
 	}
 
 	padding: 24px 0;

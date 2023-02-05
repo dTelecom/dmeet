@@ -156,22 +156,18 @@ const Call = () => {
         }
       }));
 
-      onJoin({
-        participant: {
-          uid: localUid.current, streamID: media.id, name, sid
-        }
-      });
-
       setLoading(false);
     })
       .catch(console.error);
-  }, [audioEnabled, constraints.audio?.exact, constraints.video, defaultConstraints.video, useE2ee, videoEnabled, name, sid]);
+  }, [audioEnabled, constraints.audio?.exact, constraints.video, defaultConstraints.video, useE2ee, videoEnabled]);
 
   const delay = (ms) => {
-      return new Promise(resolve => {
-          setTimeout(() => { resolve('') }, ms);
-      })
-  }
+    return new Promise(resolve => {
+      setTimeout(() => {
+        resolve('');
+      }, ms);
+    });
+  };
 
   const start = useCallback(async () => {
     try {
@@ -193,13 +189,14 @@ const Call = () => {
 
       if (location.state?.participantID !== '0' || location.state?.viewerID !== '0') {
         for (let i = 0; i < 10; ++i) {
-            await delay(1000);
-            try {
-              const verifyRes = await axios.post(url+"/verify", data);
-              if (verifyRes.status === 200) {
-                break
-              }
-            } catch {}
+          await delay(1000);
+          try {
+            const verifyRes = await axios.post(url + '/verify', data);
+            if (verifyRes.status === 200) {
+              break;
+            }
+          } catch {
+          }
         }
       }
 
@@ -282,6 +279,7 @@ const Call = () => {
 
   const onJoin = ({participant}) => {
     console.log('[onJoin]', participant);
+    console.log(participant.uid !== localUid.current);
     if (participant.uid !== localUid.current) {
       setParticipants(prev => {
         const newParticipants = [...prev];
@@ -360,7 +358,7 @@ const Call = () => {
 
   const onParticipantsCount = (data) => {
     console.log('[onParticipantsCount]', data);
-    setParticipantsCount(data.payload.participantsCount+data.payload.viewersCount)
+    setParticipantsCount(data.payload.participantsCount + data.payload.viewersCount);
   };
 
   const onDeviceSelect = useCallback((type, deviceId) => {
@@ -384,82 +382,95 @@ const Call = () => {
 
   const participantsList = useMemo(() => participants.filter((p) => p.noPublish !== true), [participants]);
 
-  return (<Box
-    className={styles.container}
-  >
-    <Header title={location.state?.title}>
-      <Flex
-        className={styles.headerControls}
-        gap={'16px'}
-      >
-        <ParticipantsBadge count={participantsCount}/>
-        <CopyToClipboardButton text={inviteLink}/>
-      </Flex>
-    </Header>
+  const twoOrLessParticipants = useMemo(() => participantsList.length <= 2, [participantsList]);
 
-    <Container
-      containerClass={styles.callContainer}
-      contentClass={styles.callContentContainer}
+  return (
+    <Box
+      className={styles.container}
     >
-
-      {isMobile ? (<Flex
-        minHeight={'calc(100% - 72px)'}
-        flexDirection={'row'}
-        flexWrap={'wrap'}
-        gap={'8px'}
-        overflowY={participantsList.length === 1 ? 'initial' : 'auto'}
-        justifyContent={'space-between'}
+      <Header
+        isMiniLogo
+        title={location.state?.title}
       >
-        {participantsList?.map((participant, index) => (<Box
-          key={participant.streamID}
-          maxHeight={participantsList.length === 1 ? 'auto' : 'calc((100vh - 72px - 48px - 88px) / 2)'}
-          width={participantsList.length === 1 ? '100%' : 'calc(50% - 8px)'}
-          style={{
-            aspectRatio: 480 / 640
-          }}
+        <Flex
+          className={styles.headerControls}
+          gap={'16px'}
         >
-          <Video
-            key={participant.streamID + index}
-            participant={participant}
-            stream={streams.current[participant.streamID]}
-            isCurrentUser={participant.uid === localUid.current}
-            mediaState={mediaState[participant.uid]}
-          />
-        </Box>))}
-      </Flex>) : (<PackedGrid
-        className={classNames(styles.videoContainer)}
-        boxAspectRatio={656 / 496}
+          <ParticipantsBadge count={participantsCount}/>
+          <CopyToClipboardButton text={inviteLink}/>
+        </Flex>
+      </Header>
+
+      <Container
+        containerClass={styles.callContainer}
+        contentClass={styles.callContentContainer}
       >
-        {participantsList?.map((participant, index) => (<Video
-          key={participant.streamID + index}
-          participant={participant}
-          stream={streams.current[participant.streamID]}
-          isCurrentUser={participant.uid === localUid.current}
-          mediaState={mediaState[participant.uid]}
-        />))}
-      </PackedGrid>)}
 
+        {isMobile ? (
+          <Box
+            minHeight={!twoOrLessParticipants ? 'auto' : undefined}
+            overflowY={twoOrLessParticipants ? 'initial' : 'auto'}
+            mb={'auto'}
+            flex={1}
+            textAlign={'center'}
+            lineHeight={0}
+          >
+            {participantsList?.map((participant, index) => (
+              <Box
+                key={participant.streamID}
+                height={twoOrLessParticipants ? 'auto' : '20%'}
+                width={twoOrLessParticipants ? '100%' : '50%'}
+                display={'inline-block'}
+                style={{
+                  aspectRatio: twoOrLessParticipants ? 318 / 220 : undefined,
+                }}
+              >
+                <Video
+                  key={participant.streamID + index}
+                  participant={participant}
+                  stream={streams.current[participant.streamID]}
+                  isCurrentUser={participant.uid === localUid.current}
+                  mediaState={mediaState[participant.uid]}
+                />
+              </Box>
+            ))}
+          </Box>
+        ) : (
+          <PackedGrid
+            className={classNames(styles.videoContainer)}
+            boxAspectRatio={656 / 496}
+          >
+            {participantsList?.map((participant, index) => (<Video
+              key={participant.streamID + index}
+              participant={participant}
+              stream={streams.current[participant.streamID]}
+              isCurrentUser={participant.uid === localUid.current}
+              mediaState={mediaState[participant.uid]}
+            />))}
+          </PackedGrid>
+        )}
 
-      {!loading && (<div className={styles.videoControls}>
-        <VideoControls
-          devices={devices}
-          onHangUp={hangup}
-          videoEnabled={videoEnabled}
-          audioEnabled={audioEnabled}
-          onDeviceChange={onDeviceSelect}
-          selectedAudioId={selectedAudioId}
-          selectedVideoId={selectedVideoId}
-          toggleAudio={() => toggleMedia('audio')}
-          toggleVideo={() => toggleMedia('video')}
-          participantsCount={participantsList.length}
-          noPublish={noPublish}
-          isCall
-        />
-      </div>)}
+        {!loading && (<div className={styles.videoControls}>
+          <VideoControls
+            devices={devices}
+            onHangUp={hangup}
+            videoEnabled={videoEnabled}
+            audioEnabled={audioEnabled}
+            onDeviceChange={onDeviceSelect}
+            selectedAudioId={selectedAudioId}
+            selectedVideoId={selectedVideoId}
+            toggleAudio={() => toggleMedia('audio')}
+            toggleVideo={() => toggleMedia('video')}
+            participantsCount={participantsList.length}
+            noPublish={noPublish}
+            isCall
+          />
+        </div>)}
 
-    </Container>
-    <Footer/>
-  </Box>);
+      </Container>
+      <Footer/>
+    </Box>
+  );
 };
 
 export default Call;

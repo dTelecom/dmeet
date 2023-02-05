@@ -1,8 +1,8 @@
-import React, {useRef} from 'react'
-import styles from './Input.module.scss'
+import React, {useRef} from 'react';
+import styles from './Input.module.scss';
 import {Box} from '@chakra-ui/react';
 
-const Input = ({value, onChange, placeholder, icon, label, containerStyle }) => {
+const Input = ({value, onChange, placeholder, icon, label, containerStyle}) => {
   const inputRef = useRef();
 
   return (
@@ -15,7 +15,10 @@ const Input = ({value, onChange, placeholder, icon, label, containerStyle }) => 
         className={styles.inputContainer}
         onClick={() => inputRef.current?.focus()}
       >
-        {icon && <img src={icon}/>}
+        {icon && <img
+          src={icon}
+          alt={'input icon'}
+        />}
 
         <input
           ref={inputRef}
@@ -27,7 +30,7 @@ const Input = ({value, onChange, placeholder, icon, label, containerStyle }) => 
         />
       </div>
     </Box>
-  )
-}
+  );
+};
 
-export default Input
+export default Input;

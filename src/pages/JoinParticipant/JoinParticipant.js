@@ -149,10 +149,11 @@ const JoinParticipant = () => {
         if (verifyRes.status === 200) {
           need = false;
         }
-      } catch {}
+      } catch {
+      }
     }
-    setPaymentNeeded(need)
-  })
+    setPaymentNeeded(need);
+  }, [room.participantPrice, sid]);
 
   const {config: contractBuyWriteConfig} = usePrepareContractWrite({
     ...contractConfig,
@@ -167,16 +168,16 @@ const JoinParticipant = () => {
   const {
     data: buyData,
     write: buyMembership,
-    isLoading: isBuyLoading,
-    isSuccess: isBuyStarted,
-    error: buyError,
+    // isLoading: isBuyLoading,
+    // isSuccess: isBuyStarted,
+    // error: buyError,
   } = useContractWrite(contractBuyWriteConfig);
 
   const {
-    data: txBuyData,
-    isSuccess: txBuySuccess,
+    // data: txBuyData,
+    // isSuccess: txBuySuccess,
     isLoading: txBuyLoading,
-    error: txBuyError,
+    // error: txBuyError,
   } = useWaitForTransaction({
     hash: buyData?.hash,
     onSuccess(data) {
