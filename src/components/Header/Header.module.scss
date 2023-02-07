@@ -38,9 +38,35 @@
 		text-align: center;
 	}
 
+	.mobileMiniTitle {
+		font-weight: 700;
+		font-size: 14px;
+		line-height: 17px;
+		text-align: center;
+		color: #555555;
+		overflow: hidden;
+		padding: 0 8px;
+
+		span {
+			text-overflow: ellipsis;
+			white-space: nowrap;
+			overflow: hidden;
+		}
+	}
+
 	.controlContainer {
 		display: flex;
 		justify-content: flex-end;
 		width: 100%;
 	}
+}
+
+.mobileTitle {
+	font-weight: 700;
+	font-size: 24px;
+	line-height: 29px;
+	text-align: center;
+	color: #555555;
+	display: block;
+	margin-top: 8px;
 }

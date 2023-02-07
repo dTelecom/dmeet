@@ -1,5 +1,5 @@
-import React from 'react'
-import styles from './VideoControls.module.scss'
+import React from 'react';
+import styles from './VideoControls.module.scss';
 import SourceControl from '../SourceControl/SourceControl';
 import {HangUpIcon} from '../../assets';
 import ParticipantsBadge from '../ParticipantsBadge/ParticipantsBadge';
@@ -55,12 +55,15 @@ const VideoControls = ({
           className={styles.hangup}
           onClick={onHangUp}
         >
-          <img src={HangUpIcon}/>
+          <img
+            src={HangUpIcon}
+            alt={'hangup icon'}
+          />
           <span>End Meeting</span>
         </button>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default VideoControls
+export default VideoControls;

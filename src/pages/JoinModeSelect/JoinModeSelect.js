@@ -12,39 +12,39 @@ import {Container} from '../../components/Container/Container';
 import {useBreakpoints} from '../../hooks/useBreakpoints';
 
 export const JoinModeSelect = () => {
-  const {isMobile} = useBreakpoints()
-  const navigate = useNavigate()
-  const {sid} = useParams()
-  const [room, setRoom] = useState()
+  const {isMobile} = useBreakpoints();
+  const navigate = useNavigate();
+  const {sid} = useParams();
+  const [room, setRoom] = useState();
 
   const loadRoom = async () => {
     axios.post('https://app.dmeet.org/api/room/info', {sid})
       .then((response) => {
-        setRoom(response.data)
+        setRoom(response.data);
       })
       .catch(e => {
-        console.error(e)
-        navigate('/')
+        console.error(e);
+        navigate('/');
       });
-  }
+  };
 
   useEffect(() => {
-    void loadRoom()
+    void loadRoom();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, []);
 
   useEffect(() => {
     if (room) {
-      if (room.viewerPrice === "") {
-        navigate(`/join/participant/${sid}`, {state: {room}})
+      if (room.viewerPrice === '') {
+        navigate(`/join/participant/${sid}`, {state: {room}});
       }
-      if (room.participantPrice === "") {
-        navigate(`/join/viewer/${sid}`, {state: {room}})
+      if (room.participantPrice === '') {
+        navigate(`/join/viewer/${sid}`, {state: {room}});
       }
     }
-  }, [room])
+  }, [navigate, room, sid]);
 
-  if (!room) return null
+  if (!room) return null;
 
   return (
     <>
@@ -58,10 +58,6 @@ export const JoinModeSelect = () => {
           <span className={styles.smallText}>at the room:</span>&nbsp;<ParticipantsBadge count={room?.count}/>
         </Flex>
       </Header>
-
-      {isMobile && (
-        <h3 className={styles.mobileTitle}>{room?.title}</h3>
-      )}
 
       <Container>
         <Flex
@@ -107,5 +103,5 @@ export const JoinModeSelect = () => {
 
       <Footer/>
     </>
-  )
-}
+  );
+};
