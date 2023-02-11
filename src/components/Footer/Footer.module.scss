@@ -4,8 +4,10 @@
 	border-top: 2px solid #252728;
 	gap: 8px;
 	width: 100%;
+	flex-shrink: 0;
 
 	@media (min-width: 900px) {
+		flex-shrink: initial;
 		height: 63px;
 	}
 
