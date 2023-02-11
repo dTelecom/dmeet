@@ -1,6 +1,6 @@
 import styles from "../../pages/Call/Call.module.scss"
 import React, {useEffect, useRef, useState} from "react"
-import {ChainGreenIcon, ChainIcon, WhiteTickIcon} from '../../assets'
+import {ChainGreenIcon, ChainIcon, GreenTickIcon, WhiteTickIcon} from '../../assets'
 import CopyToClipboard from 'react-copy-to-clipboard'
 import {useBreakpoints} from "../../hooks/useBreakpoints"
 
@@ -35,7 +35,7 @@ export const CopyToClipboardButton = ({text}: IProps) => {
       {isMobile ? (
         <button className={styles.inviteButtonMobile}>
           <img
-            src={copied ? WhiteTickIcon : ChainGreenIcon}
+            src={copied ? GreenTickIcon : ChainGreenIcon}
             alt={'copy icon'}
           />
         </button>

@@ -19,6 +19,7 @@ import CheckboxOffIcon from './checboxOff.svg';
 import CheckboxOnIcon from './checkboxOn.svg';
 import KeyIcon from './keyIcon.svg';
 import ChainGreenIcon from './chainGreen.svg';
+import GreenTickIcon from './greenTickIcon.svg';
 
 export {
   FaceIcon,
@@ -42,4 +43,5 @@ export {
   CheckboxOnIcon,
   KeyIcon,
   ChainGreenIcon,
+  GreenTickIcon,
 };
