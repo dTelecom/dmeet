@@ -33,14 +33,20 @@ export const CopyToClipboardButton = ({text}: IProps) => {
       text={text}
     >
       {isMobile ? (
-        <button className={styles.inviteButtonMobile}>
+        <button
+          disabled={!text}
+          className={styles.inviteButtonMobile}
+        >
           <img
             src={copied ? GreenTickIcon : ChainGreenIcon}
             alt={'copy icon'}
           />
         </button>
       ) : (
-        <button className={styles.inviteButton}>
+        <button
+          disabled={!text}
+          className={styles.inviteButton}
+        >
           <img
             src={copied ? WhiteTickIcon : ChainIcon}
             alt={'copy icon'}
